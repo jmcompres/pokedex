@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '/app/bootstrap/bootstrap.dart';
+import '/app/router/app_router.dart';
+
 void main() {
-  runApp(const PokedexApp());
+  bootstrap(() => const PokedexApp());
 }
 
 class PokedexApp extends StatelessWidget {
@@ -9,14 +12,14 @@ class PokedexApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Pokédex Offline-First',
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
-      home: const Scaffold(body: Center(child: Text('Pokédex Offline-First'))),
     );
   }
 }
