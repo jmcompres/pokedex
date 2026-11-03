@@ -7,6 +7,8 @@ import 'tables/catalog/evolutions_table.dart';
 import 'tables/catalog/generations_table.dart';
 import 'tables/catalog/moves_table.dart';
 import 'tables/catalog/pokemon_abilities_table.dart';
+import 'tables/catalog/pokemon_form_types_table.dart';
+import 'tables/catalog/pokemon_forms_table.dart';
 import 'tables/catalog/pokemon_moves_table.dart';
 import 'tables/catalog/pokemon_table.dart';
 import 'tables/catalog/pokemon_types_table.dart';
@@ -32,6 +34,8 @@ part 'app_database.g.dart';
   PokemonTable,
   TypesTable,
   PokemonTypesTable,
+  PokemonFormsTable,
+  PokemonFormTypesTable,
   TypeEfficacyTable,
   AbilitiesTable,
   PokemonAbilitiesTable,

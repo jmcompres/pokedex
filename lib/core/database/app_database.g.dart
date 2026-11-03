@@ -2085,6 +2085,892 @@ class PokemonTypesTableCompanion extends UpdateCompanion<PokemonTypeRow> {
   }
 }
 
+class $PokemonFormsTableTable extends PokemonFormsTable
+    with TableInfo<$PokemonFormsTableTable, PokemonFormRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PokemonFormsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pokemonIdMeta = const VerificationMeta(
+    'pokemonId',
+  );
+  @override
+  late final GeneratedColumn<int> pokemonId = GeneratedColumn<int>(
+    'pokemon_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pokemon (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _formNameMeta = const VerificationMeta(
+    'formName',
+  );
+  @override
+  late final GeneratedColumn<String> formName = GeneratedColumn<String>(
+    'form_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDefaultMeta = const VerificationMeta(
+    'isDefault',
+  );
+  @override
+  late final GeneratedColumn<bool> isDefault = GeneratedColumn<bool>(
+    'is_default',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_default" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _isMegaMeta = const VerificationMeta('isMega');
+  @override
+  late final GeneratedColumn<bool> isMega = GeneratedColumn<bool>(
+    'is_mega',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_mega" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _isBattleOnlyMeta = const VerificationMeta(
+    'isBattleOnly',
+  );
+  @override
+  late final GeneratedColumn<bool> isBattleOnly = GeneratedColumn<bool>(
+    'is_battle_only',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_battle_only" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _formOrderMeta = const VerificationMeta(
+    'formOrder',
+  );
+  @override
+  late final GeneratedColumn<int> formOrder = GeneratedColumn<int>(
+    'form_order',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _spriteUrlMeta = const VerificationMeta(
+    'spriteUrl',
+  );
+  @override
+  late final GeneratedColumn<String> spriteUrl = GeneratedColumn<String>(
+    'sprite_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _spriteShinyUrlMeta = const VerificationMeta(
+    'spriteShinyUrl',
+  );
+  @override
+  late final GeneratedColumn<String> spriteShinyUrl = GeneratedColumn<String>(
+    'sprite_shiny_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    pokemonId,
+    name,
+    formName,
+    isDefault,
+    isMega,
+    isBattleOnly,
+    formOrder,
+    spriteUrl,
+    spriteShinyUrl,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pokemon_form';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PokemonFormRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('pokemon_id')) {
+      context.handle(
+        _pokemonIdMeta,
+        pokemonId.isAcceptableOrUnknown(data['pokemon_id']!, _pokemonIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pokemonIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('form_name')) {
+      context.handle(
+        _formNameMeta,
+        formName.isAcceptableOrUnknown(data['form_name']!, _formNameMeta),
+      );
+    }
+    if (data.containsKey('is_default')) {
+      context.handle(
+        _isDefaultMeta,
+        isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isDefaultMeta);
+    }
+    if (data.containsKey('is_mega')) {
+      context.handle(
+        _isMegaMeta,
+        isMega.isAcceptableOrUnknown(data['is_mega']!, _isMegaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isMegaMeta);
+    }
+    if (data.containsKey('is_battle_only')) {
+      context.handle(
+        _isBattleOnlyMeta,
+        isBattleOnly.isAcceptableOrUnknown(
+          data['is_battle_only']!,
+          _isBattleOnlyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_isBattleOnlyMeta);
+    }
+    if (data.containsKey('form_order')) {
+      context.handle(
+        _formOrderMeta,
+        formOrder.isAcceptableOrUnknown(data['form_order']!, _formOrderMeta),
+      );
+    }
+    if (data.containsKey('sprite_url')) {
+      context.handle(
+        _spriteUrlMeta,
+        spriteUrl.isAcceptableOrUnknown(data['sprite_url']!, _spriteUrlMeta),
+      );
+    }
+    if (data.containsKey('sprite_shiny_url')) {
+      context.handle(
+        _spriteShinyUrlMeta,
+        spriteShinyUrl.isAcceptableOrUnknown(
+          data['sprite_shiny_url']!,
+          _spriteShinyUrlMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PokemonFormRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PokemonFormRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      pokemonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pokemon_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      formName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}form_name'],
+      ),
+      isDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_default'],
+      )!,
+      isMega: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_mega'],
+      )!,
+      isBattleOnly: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_battle_only'],
+      )!,
+      formOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}form_order'],
+      ),
+      spriteUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sprite_url'],
+      ),
+      spriteShinyUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sprite_shiny_url'],
+      ),
+    );
+  }
+
+  @override
+  $PokemonFormsTableTable createAlias(String alias) {
+    return $PokemonFormsTableTable(attachedDatabase, alias);
+  }
+}
+
+class PokemonFormRow extends DataClass implements Insertable<PokemonFormRow> {
+  final int id;
+  final int pokemonId;
+  final String name;
+  final String? formName;
+  final bool isDefault;
+  final bool isMega;
+  final bool isBattleOnly;
+  final int? formOrder;
+  final String? spriteUrl;
+  final String? spriteShinyUrl;
+  const PokemonFormRow({
+    required this.id,
+    required this.pokemonId,
+    required this.name,
+    this.formName,
+    required this.isDefault,
+    required this.isMega,
+    required this.isBattleOnly,
+    this.formOrder,
+    this.spriteUrl,
+    this.spriteShinyUrl,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['pokemon_id'] = Variable<int>(pokemonId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || formName != null) {
+      map['form_name'] = Variable<String>(formName);
+    }
+    map['is_default'] = Variable<bool>(isDefault);
+    map['is_mega'] = Variable<bool>(isMega);
+    map['is_battle_only'] = Variable<bool>(isBattleOnly);
+    if (!nullToAbsent || formOrder != null) {
+      map['form_order'] = Variable<int>(formOrder);
+    }
+    if (!nullToAbsent || spriteUrl != null) {
+      map['sprite_url'] = Variable<String>(spriteUrl);
+    }
+    if (!nullToAbsent || spriteShinyUrl != null) {
+      map['sprite_shiny_url'] = Variable<String>(spriteShinyUrl);
+    }
+    return map;
+  }
+
+  PokemonFormsTableCompanion toCompanion(bool nullToAbsent) {
+    return PokemonFormsTableCompanion(
+      id: Value(id),
+      pokemonId: Value(pokemonId),
+      name: Value(name),
+      formName: formName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(formName),
+      isDefault: Value(isDefault),
+      isMega: Value(isMega),
+      isBattleOnly: Value(isBattleOnly),
+      formOrder: formOrder == null && nullToAbsent
+          ? const Value.absent()
+          : Value(formOrder),
+      spriteUrl: spriteUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spriteUrl),
+      spriteShinyUrl: spriteShinyUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spriteShinyUrl),
+    );
+  }
+
+  factory PokemonFormRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PokemonFormRow(
+      id: serializer.fromJson<int>(json['id']),
+      pokemonId: serializer.fromJson<int>(json['pokemonId']),
+      name: serializer.fromJson<String>(json['name']),
+      formName: serializer.fromJson<String?>(json['formName']),
+      isDefault: serializer.fromJson<bool>(json['isDefault']),
+      isMega: serializer.fromJson<bool>(json['isMega']),
+      isBattleOnly: serializer.fromJson<bool>(json['isBattleOnly']),
+      formOrder: serializer.fromJson<int?>(json['formOrder']),
+      spriteUrl: serializer.fromJson<String?>(json['spriteUrl']),
+      spriteShinyUrl: serializer.fromJson<String?>(json['spriteShinyUrl']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'pokemonId': serializer.toJson<int>(pokemonId),
+      'name': serializer.toJson<String>(name),
+      'formName': serializer.toJson<String?>(formName),
+      'isDefault': serializer.toJson<bool>(isDefault),
+      'isMega': serializer.toJson<bool>(isMega),
+      'isBattleOnly': serializer.toJson<bool>(isBattleOnly),
+      'formOrder': serializer.toJson<int?>(formOrder),
+      'spriteUrl': serializer.toJson<String?>(spriteUrl),
+      'spriteShinyUrl': serializer.toJson<String?>(spriteShinyUrl),
+    };
+  }
+
+  PokemonFormRow copyWith({
+    int? id,
+    int? pokemonId,
+    String? name,
+    Value<String?> formName = const Value.absent(),
+    bool? isDefault,
+    bool? isMega,
+    bool? isBattleOnly,
+    Value<int?> formOrder = const Value.absent(),
+    Value<String?> spriteUrl = const Value.absent(),
+    Value<String?> spriteShinyUrl = const Value.absent(),
+  }) => PokemonFormRow(
+    id: id ?? this.id,
+    pokemonId: pokemonId ?? this.pokemonId,
+    name: name ?? this.name,
+    formName: formName.present ? formName.value : this.formName,
+    isDefault: isDefault ?? this.isDefault,
+    isMega: isMega ?? this.isMega,
+    isBattleOnly: isBattleOnly ?? this.isBattleOnly,
+    formOrder: formOrder.present ? formOrder.value : this.formOrder,
+    spriteUrl: spriteUrl.present ? spriteUrl.value : this.spriteUrl,
+    spriteShinyUrl: spriteShinyUrl.present
+        ? spriteShinyUrl.value
+        : this.spriteShinyUrl,
+  );
+  PokemonFormRow copyWithCompanion(PokemonFormsTableCompanion data) {
+    return PokemonFormRow(
+      id: data.id.present ? data.id.value : this.id,
+      pokemonId: data.pokemonId.present ? data.pokemonId.value : this.pokemonId,
+      name: data.name.present ? data.name.value : this.name,
+      formName: data.formName.present ? data.formName.value : this.formName,
+      isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
+      isMega: data.isMega.present ? data.isMega.value : this.isMega,
+      isBattleOnly: data.isBattleOnly.present
+          ? data.isBattleOnly.value
+          : this.isBattleOnly,
+      formOrder: data.formOrder.present ? data.formOrder.value : this.formOrder,
+      spriteUrl: data.spriteUrl.present ? data.spriteUrl.value : this.spriteUrl,
+      spriteShinyUrl: data.spriteShinyUrl.present
+          ? data.spriteShinyUrl.value
+          : this.spriteShinyUrl,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonFormRow(')
+          ..write('id: $id, ')
+          ..write('pokemonId: $pokemonId, ')
+          ..write('name: $name, ')
+          ..write('formName: $formName, ')
+          ..write('isDefault: $isDefault, ')
+          ..write('isMega: $isMega, ')
+          ..write('isBattleOnly: $isBattleOnly, ')
+          ..write('formOrder: $formOrder, ')
+          ..write('spriteUrl: $spriteUrl, ')
+          ..write('spriteShinyUrl: $spriteShinyUrl')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    pokemonId,
+    name,
+    formName,
+    isDefault,
+    isMega,
+    isBattleOnly,
+    formOrder,
+    spriteUrl,
+    spriteShinyUrl,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PokemonFormRow &&
+          other.id == this.id &&
+          other.pokemonId == this.pokemonId &&
+          other.name == this.name &&
+          other.formName == this.formName &&
+          other.isDefault == this.isDefault &&
+          other.isMega == this.isMega &&
+          other.isBattleOnly == this.isBattleOnly &&
+          other.formOrder == this.formOrder &&
+          other.spriteUrl == this.spriteUrl &&
+          other.spriteShinyUrl == this.spriteShinyUrl);
+}
+
+class PokemonFormsTableCompanion extends UpdateCompanion<PokemonFormRow> {
+  final Value<int> id;
+  final Value<int> pokemonId;
+  final Value<String> name;
+  final Value<String?> formName;
+  final Value<bool> isDefault;
+  final Value<bool> isMega;
+  final Value<bool> isBattleOnly;
+  final Value<int?> formOrder;
+  final Value<String?> spriteUrl;
+  final Value<String?> spriteShinyUrl;
+  const PokemonFormsTableCompanion({
+    this.id = const Value.absent(),
+    this.pokemonId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.formName = const Value.absent(),
+    this.isDefault = const Value.absent(),
+    this.isMega = const Value.absent(),
+    this.isBattleOnly = const Value.absent(),
+    this.formOrder = const Value.absent(),
+    this.spriteUrl = const Value.absent(),
+    this.spriteShinyUrl = const Value.absent(),
+  });
+  PokemonFormsTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int pokemonId,
+    required String name,
+    this.formName = const Value.absent(),
+    required bool isDefault,
+    required bool isMega,
+    required bool isBattleOnly,
+    this.formOrder = const Value.absent(),
+    this.spriteUrl = const Value.absent(),
+    this.spriteShinyUrl = const Value.absent(),
+  }) : pokemonId = Value(pokemonId),
+       name = Value(name),
+       isDefault = Value(isDefault),
+       isMega = Value(isMega),
+       isBattleOnly = Value(isBattleOnly);
+  static Insertable<PokemonFormRow> custom({
+    Expression<int>? id,
+    Expression<int>? pokemonId,
+    Expression<String>? name,
+    Expression<String>? formName,
+    Expression<bool>? isDefault,
+    Expression<bool>? isMega,
+    Expression<bool>? isBattleOnly,
+    Expression<int>? formOrder,
+    Expression<String>? spriteUrl,
+    Expression<String>? spriteShinyUrl,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pokemonId != null) 'pokemon_id': pokemonId,
+      if (name != null) 'name': name,
+      if (formName != null) 'form_name': formName,
+      if (isDefault != null) 'is_default': isDefault,
+      if (isMega != null) 'is_mega': isMega,
+      if (isBattleOnly != null) 'is_battle_only': isBattleOnly,
+      if (formOrder != null) 'form_order': formOrder,
+      if (spriteUrl != null) 'sprite_url': spriteUrl,
+      if (spriteShinyUrl != null) 'sprite_shiny_url': spriteShinyUrl,
+    });
+  }
+
+  PokemonFormsTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? pokemonId,
+    Value<String>? name,
+    Value<String?>? formName,
+    Value<bool>? isDefault,
+    Value<bool>? isMega,
+    Value<bool>? isBattleOnly,
+    Value<int?>? formOrder,
+    Value<String?>? spriteUrl,
+    Value<String?>? spriteShinyUrl,
+  }) {
+    return PokemonFormsTableCompanion(
+      id: id ?? this.id,
+      pokemonId: pokemonId ?? this.pokemonId,
+      name: name ?? this.name,
+      formName: formName ?? this.formName,
+      isDefault: isDefault ?? this.isDefault,
+      isMega: isMega ?? this.isMega,
+      isBattleOnly: isBattleOnly ?? this.isBattleOnly,
+      formOrder: formOrder ?? this.formOrder,
+      spriteUrl: spriteUrl ?? this.spriteUrl,
+      spriteShinyUrl: spriteShinyUrl ?? this.spriteShinyUrl,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (pokemonId.present) {
+      map['pokemon_id'] = Variable<int>(pokemonId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (formName.present) {
+      map['form_name'] = Variable<String>(formName.value);
+    }
+    if (isDefault.present) {
+      map['is_default'] = Variable<bool>(isDefault.value);
+    }
+    if (isMega.present) {
+      map['is_mega'] = Variable<bool>(isMega.value);
+    }
+    if (isBattleOnly.present) {
+      map['is_battle_only'] = Variable<bool>(isBattleOnly.value);
+    }
+    if (formOrder.present) {
+      map['form_order'] = Variable<int>(formOrder.value);
+    }
+    if (spriteUrl.present) {
+      map['sprite_url'] = Variable<String>(spriteUrl.value);
+    }
+    if (spriteShinyUrl.present) {
+      map['sprite_shiny_url'] = Variable<String>(spriteShinyUrl.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonFormsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('pokemonId: $pokemonId, ')
+          ..write('name: $name, ')
+          ..write('formName: $formName, ')
+          ..write('isDefault: $isDefault, ')
+          ..write('isMega: $isMega, ')
+          ..write('isBattleOnly: $isBattleOnly, ')
+          ..write('formOrder: $formOrder, ')
+          ..write('spriteUrl: $spriteUrl, ')
+          ..write('spriteShinyUrl: $spriteShinyUrl')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PokemonFormTypesTableTable extends PokemonFormTypesTable
+    with TableInfo<$PokemonFormTypesTableTable, PokemonFormTypeRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PokemonFormTypesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _formIdMeta = const VerificationMeta('formId');
+  @override
+  late final GeneratedColumn<int> formId = GeneratedColumn<int>(
+    'form_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pokemon_form (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _typeIdMeta = const VerificationMeta('typeId');
+  @override
+  late final GeneratedColumn<int> typeId = GeneratedColumn<int>(
+    'type_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES type (id)',
+    ),
+  );
+  static const VerificationMeta _slotMeta = const VerificationMeta('slot');
+  @override
+  late final GeneratedColumn<int> slot = GeneratedColumn<int>(
+    'slot',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [formId, typeId, slot];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pokemon_form_type';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PokemonFormTypeRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('form_id')) {
+      context.handle(
+        _formIdMeta,
+        formId.isAcceptableOrUnknown(data['form_id']!, _formIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_formIdMeta);
+    }
+    if (data.containsKey('type_id')) {
+      context.handle(
+        _typeIdMeta,
+        typeId.isAcceptableOrUnknown(data['type_id']!, _typeIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeIdMeta);
+    }
+    if (data.containsKey('slot')) {
+      context.handle(
+        _slotMeta,
+        slot.isAcceptableOrUnknown(data['slot']!, _slotMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_slotMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {formId, slot};
+  @override
+  PokemonFormTypeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PokemonFormTypeRow(
+      formId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}form_id'],
+      )!,
+      typeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}type_id'],
+      )!,
+      slot: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}slot'],
+      )!,
+    );
+  }
+
+  @override
+  $PokemonFormTypesTableTable createAlias(String alias) {
+    return $PokemonFormTypesTableTable(attachedDatabase, alias);
+  }
+}
+
+class PokemonFormTypeRow extends DataClass
+    implements Insertable<PokemonFormTypeRow> {
+  final int formId;
+  final int typeId;
+  final int slot;
+  const PokemonFormTypeRow({
+    required this.formId,
+    required this.typeId,
+    required this.slot,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['form_id'] = Variable<int>(formId);
+    map['type_id'] = Variable<int>(typeId);
+    map['slot'] = Variable<int>(slot);
+    return map;
+  }
+
+  PokemonFormTypesTableCompanion toCompanion(bool nullToAbsent) {
+    return PokemonFormTypesTableCompanion(
+      formId: Value(formId),
+      typeId: Value(typeId),
+      slot: Value(slot),
+    );
+  }
+
+  factory PokemonFormTypeRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PokemonFormTypeRow(
+      formId: serializer.fromJson<int>(json['formId']),
+      typeId: serializer.fromJson<int>(json['typeId']),
+      slot: serializer.fromJson<int>(json['slot']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'formId': serializer.toJson<int>(formId),
+      'typeId': serializer.toJson<int>(typeId),
+      'slot': serializer.toJson<int>(slot),
+    };
+  }
+
+  PokemonFormTypeRow copyWith({int? formId, int? typeId, int? slot}) =>
+      PokemonFormTypeRow(
+        formId: formId ?? this.formId,
+        typeId: typeId ?? this.typeId,
+        slot: slot ?? this.slot,
+      );
+  PokemonFormTypeRow copyWithCompanion(PokemonFormTypesTableCompanion data) {
+    return PokemonFormTypeRow(
+      formId: data.formId.present ? data.formId.value : this.formId,
+      typeId: data.typeId.present ? data.typeId.value : this.typeId,
+      slot: data.slot.present ? data.slot.value : this.slot,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonFormTypeRow(')
+          ..write('formId: $formId, ')
+          ..write('typeId: $typeId, ')
+          ..write('slot: $slot')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(formId, typeId, slot);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PokemonFormTypeRow &&
+          other.formId == this.formId &&
+          other.typeId == this.typeId &&
+          other.slot == this.slot);
+}
+
+class PokemonFormTypesTableCompanion
+    extends UpdateCompanion<PokemonFormTypeRow> {
+  final Value<int> formId;
+  final Value<int> typeId;
+  final Value<int> slot;
+  final Value<int> rowid;
+  const PokemonFormTypesTableCompanion({
+    this.formId = const Value.absent(),
+    this.typeId = const Value.absent(),
+    this.slot = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PokemonFormTypesTableCompanion.insert({
+    required int formId,
+    required int typeId,
+    required int slot,
+    this.rowid = const Value.absent(),
+  }) : formId = Value(formId),
+       typeId = Value(typeId),
+       slot = Value(slot);
+  static Insertable<PokemonFormTypeRow> custom({
+    Expression<int>? formId,
+    Expression<int>? typeId,
+    Expression<int>? slot,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (formId != null) 'form_id': formId,
+      if (typeId != null) 'type_id': typeId,
+      if (slot != null) 'slot': slot,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PokemonFormTypesTableCompanion copyWith({
+    Value<int>? formId,
+    Value<int>? typeId,
+    Value<int>? slot,
+    Value<int>? rowid,
+  }) {
+    return PokemonFormTypesTableCompanion(
+      formId: formId ?? this.formId,
+      typeId: typeId ?? this.typeId,
+      slot: slot ?? this.slot,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (formId.present) {
+      map['form_id'] = Variable<int>(formId.value);
+    }
+    if (typeId.present) {
+      map['type_id'] = Variable<int>(typeId.value);
+    }
+    if (slot.present) {
+      map['slot'] = Variable<int>(slot.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PokemonFormTypesTableCompanion(')
+          ..write('formId: $formId, ')
+          ..write('typeId: $typeId, ')
+          ..write('slot: $slot, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TypeEfficacyTableTable extends TypeEfficacyTable
     with TableInfo<$TypeEfficacyTableTable, TypeEfficacyRow> {
   @override
@@ -6854,6 +7740,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TypesTableTable typesTable = $TypesTableTable(this);
   late final $PokemonTypesTableTable pokemonTypesTable =
       $PokemonTypesTableTable(this);
+  late final $PokemonFormsTableTable pokemonFormsTable =
+      $PokemonFormsTableTable(this);
+  late final $PokemonFormTypesTableTable pokemonFormTypesTable =
+      $PokemonFormTypesTableTable(this);
   late final $TypeEfficacyTableTable typeEfficacyTable =
       $TypeEfficacyTableTable(this);
   late final $AbilitiesTableTable abilitiesTable = $AbilitiesTableTable(this);
@@ -6903,6 +7793,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_pokemon_type_type',
     'CREATE INDEX idx_pokemon_type_type ON pokemon_type (type_id)',
   );
+  late final Index idxPokemonFormPokemon = Index(
+    'idx_pokemon_form_pokemon',
+    'CREATE INDEX idx_pokemon_form_pokemon ON pokemon_form (pokemon_id)',
+  );
   late final Index idxPokemonAbilityAbility = Index(
     'idx_pokemon_ability_ability',
     'CREATE INDEX idx_pokemon_ability_ability ON pokemon_ability (ability_id)',
@@ -6925,6 +7819,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     pokemonTable,
     typesTable,
     pokemonTypesTable,
+    pokemonFormsTable,
+    pokemonFormTypesTable,
     typeEfficacyTable,
     abilitiesTable,
     pokemonAbilitiesTable,
@@ -6945,6 +7841,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxPokemonSpecies,
     idxPokemonBst,
     idxPokemonTypeType,
+    idxPokemonFormPokemon,
     idxPokemonAbilityAbility,
     idxEvolutionFrom,
     idxEvolutionTo,
@@ -6957,6 +7854,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('pokemon_type', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'pokemon',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('pokemon_form', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'pokemon_form',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('pokemon_form_type', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -7937,6 +8848,27 @@ final class $$PokemonTableTableReferences
     );
   }
 
+  static MultiTypedResultKey<$PokemonFormsTableTable, List<PokemonFormRow>>
+  _pokemonFormsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.pokemonFormsTable,
+        aliasName: 'pokemon__id__pokemon_form__pokemon_id',
+      );
+
+  $$PokemonFormsTableTableProcessedTableManager get pokemonFormsTableRefs {
+    final manager = $$PokemonFormsTableTableTableManager(
+      $_db,
+      $_db.pokemonFormsTable,
+    ).filter((f) => f.pokemonId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pokemonFormsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<
     $PokemonAbilitiesTableTable,
     List<PokemonAbilityRow>
@@ -8140,6 +9072,31 @@ class $$PokemonTableTableFilterComposer
           }) => $$PokemonTypesTableTableFilterComposer(
             $db: $db,
             $table: $db.pokemonTypesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> pokemonFormsTableRefs(
+    Expression<bool> Function($$PokemonFormsTableTableFilterComposer f) f,
+  ) {
+    final $$PokemonFormsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pokemonFormsTable,
+      getReferencedColumn: (t) => t.pokemonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonFormsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemonFormsTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -8475,6 +9432,32 @@ class $$PokemonTableTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> pokemonFormsTableRefs<T extends Object>(
+    Expression<T> Function($$PokemonFormsTableTableAnnotationComposer a) f,
+  ) {
+    final $$PokemonFormsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.pokemonFormsTable,
+          getReferencedColumn: (t) => t.pokemonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PokemonFormsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.pokemonFormsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
   Expression<T> pokemonAbilitiesTableRefs<T extends Object>(
     Expression<T> Function($$PokemonAbilitiesTableTableAnnotationComposer a) f,
   ) {
@@ -8569,6 +9552,7 @@ class $$PokemonTableTableTableManager
           PrefetchHooks Function({
             bool speciesId,
             bool pokemonTypesTableRefs,
+            bool pokemonFormsTableRefs,
             bool pokemonAbilitiesTableRefs,
             bool pokemonMovesTableRefs,
             bool favoritesTableRefs,
@@ -8677,6 +9661,7 @@ class $$PokemonTableTableTableManager
               ({
                 speciesId = false,
                 pokemonTypesTableRefs = false,
+                pokemonFormsTableRefs = false,
                 pokemonAbilitiesTableRefs = false,
                 pokemonMovesTableRefs = false,
                 favoritesTableRefs = false,
@@ -8685,6 +9670,7 @@ class $$PokemonTableTableTableManager
                   db: db,
                   explicitlyWatchedTables: [
                     if (pokemonTypesTableRefs) db.pokemonTypesTable,
+                    if (pokemonFormsTableRefs) db.pokemonFormsTable,
                     if (pokemonAbilitiesTableRefs) db.pokemonAbilitiesTable,
                     if (pokemonMovesTableRefs) db.pokemonMovesTable,
                     if (favoritesTableRefs) db.favoritesTable,
@@ -8737,6 +9723,26 @@ class $$PokemonTableTableTableManager
                                 table,
                                 p0,
                               ).pokemonTypesTableRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'pokemon_id',
+                          typedResults: items,
+                        ),
+                      if (pokemonFormsTableRefs)
+                        await $_getPrefetchedDataByColumns<
+                          PokemonRow,
+                          $PokemonTableTable,
+                          PokemonFormRow,
+                          $PokemonFormsTableTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PokemonTableTableReferences
+                              ._pokemonFormsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PokemonTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pokemonFormsTableRefs,
                           currentColumn: 'id',
                           referencedColumn: 'pokemon_id',
                           typedResults: items,
@@ -8824,6 +9830,7 @@ typedef $$PokemonTableTableProcessedTableManager =
       PrefetchHooks Function({
         bool speciesId,
         bool pokemonTypesTableRefs,
+        bool pokemonFormsTableRefs,
         bool pokemonAbilitiesTableRefs,
         bool pokemonMovesTableRefs,
         bool favoritesTableRefs,
@@ -8859,6 +9866,31 @@ final class $$TypesTableTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _pokemonTypesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $PokemonFormTypesTableTable,
+    List<PokemonFormTypeRow>
+  >
+  _pokemonFormTypesTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.pokemonFormTypesTable,
+        aliasName: 'type__id__pokemon_form_type__type_id',
+      );
+
+  $$PokemonFormTypesTableTableProcessedTableManager
+  get pokemonFormTypesTableRefs {
+    final manager = $$PokemonFormTypesTableTableTableManager(
+      $_db,
+      $_db.pokemonFormTypesTable,
+    ).filter((f) => f.typeId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pokemonFormTypesTableRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -8930,6 +9962,32 @@ class $$TypesTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> pokemonFormTypesTableRefs(
+    Expression<bool> Function($$PokemonFormTypesTableTableFilterComposer f) f,
+  ) {
+    final $$PokemonFormTypesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.pokemonFormTypesTable,
+          getReferencedColumn: (t) => t.typeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PokemonFormTypesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.pokemonFormTypesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 
@@ -9028,6 +10086,32 @@ class $$TypesTableTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> pokemonFormTypesTableRefs<T extends Object>(
+    Expression<T> Function($$PokemonFormTypesTableTableAnnotationComposer a) f,
+  ) {
+    final $$PokemonFormTypesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.pokemonFormTypesTable,
+          getReferencedColumn: (t) => t.typeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PokemonFormTypesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.pokemonFormTypesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
   Expression<T> movesTableRefs<T extends Object>(
     Expression<T> Function($$MovesTableTableAnnotationComposer a) f,
   ) {
@@ -9069,6 +10153,7 @@ class $$TypesTableTableTableManager
           TypeRow,
           PrefetchHooks Function({
             bool pokemonTypesTableRefs,
+            bool pokemonFormTypesTableRefs,
             bool movesTableRefs,
           })
         > {
@@ -9102,11 +10187,16 @@ class $$TypesTableTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({pokemonTypesTableRefs = false, movesTableRefs = false}) {
+              ({
+                pokemonTypesTableRefs = false,
+                pokemonFormTypesTableRefs = false,
+                movesTableRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (pokemonTypesTableRefs) db.pokemonTypesTable,
+                    if (pokemonFormTypesTableRefs) db.pokemonFormTypesTable,
                     if (movesTableRefs) db.movesTable,
                   ],
                   addJoins: null,
@@ -9128,6 +10218,26 @@ class $$TypesTableTableTableManager
                                 table,
                                 p0,
                               ).pokemonTypesTableRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'type_id',
+                          typedResults: items,
+                        ),
+                      if (pokemonFormTypesTableRefs)
+                        await $_getPrefetchedDataByColumns<
+                          TypeRow,
+                          $TypesTableTable,
+                          PokemonFormTypeRow,
+                          $PokemonFormTypesTableTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TypesTableTableReferences
+                              ._pokemonFormTypesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TypesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pokemonFormTypesTableRefs,
                           currentColumn: 'id',
                           referencedColumn: 'type_id',
                           typedResults: items,
@@ -9172,7 +10282,11 @@ typedef $$TypesTableTableProcessedTableManager =
       $$TypesTableTableUpdateCompanionBuilder,
       (TypeRow, $$TypesTableTableReferences),
       TypeRow,
-      PrefetchHooks Function({bool pokemonTypesTableRefs, bool movesTableRefs})
+      PrefetchHooks Function({
+        bool pokemonTypesTableRefs,
+        bool pokemonFormTypesTableRefs,
+        bool movesTableRefs,
+      })
     >;
 typedef $$PokemonTypesTableTableCreateCompanionBuilder =
     PokemonTypesTableCompanion Function({
@@ -9544,6 +10658,913 @@ typedef $$PokemonTypesTableTableProcessedTableManager =
       (PokemonTypeRow, $$PokemonTypesTableTableReferences),
       PokemonTypeRow,
       PrefetchHooks Function({bool pokemonId, bool typeId})
+    >;
+typedef $$PokemonFormsTableTableCreateCompanionBuilder =
+    PokemonFormsTableCompanion Function({
+      Value<int> id,
+      required int pokemonId,
+      required String name,
+      Value<String?> formName,
+      required bool isDefault,
+      required bool isMega,
+      required bool isBattleOnly,
+      Value<int?> formOrder,
+      Value<String?> spriteUrl,
+      Value<String?> spriteShinyUrl,
+    });
+typedef $$PokemonFormsTableTableUpdateCompanionBuilder =
+    PokemonFormsTableCompanion Function({
+      Value<int> id,
+      Value<int> pokemonId,
+      Value<String> name,
+      Value<String?> formName,
+      Value<bool> isDefault,
+      Value<bool> isMega,
+      Value<bool> isBattleOnly,
+      Value<int?> formOrder,
+      Value<String?> spriteUrl,
+      Value<String?> spriteShinyUrl,
+    });
+
+final class $$PokemonFormsTableTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $PokemonFormsTableTable, PokemonFormRow> {
+  $$PokemonFormsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PokemonTableTable _pokemonIdTable(_$AppDatabase db) =>
+      db.pokemonTable.createAlias('pokemon_form__pokemon_id__pokemon__id');
+
+  $$PokemonTableTableProcessedTableManager get pokemonId {
+    final $_column = $_itemColumn<int>('pokemon_id')!;
+
+    final manager = $$PokemonTableTableTableManager(
+      $_db,
+      $_db.pokemonTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pokemonIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $PokemonFormTypesTableTable,
+    List<PokemonFormTypeRow>
+  >
+  _pokemonFormTypesTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.pokemonFormTypesTable,
+        aliasName: 'pokemon_form__id__pokemon_form_type__form_id',
+      );
+
+  $$PokemonFormTypesTableTableProcessedTableManager
+  get pokemonFormTypesTableRefs {
+    final manager = $$PokemonFormTypesTableTableTableManager(
+      $_db,
+      $_db.pokemonFormTypesTable,
+    ).filter((f) => f.formId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _pokemonFormTypesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$PokemonFormsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PokemonFormsTableTable> {
+  $$PokemonFormsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get formName => $composableBuilder(
+    column: $table.formName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isMega => $composableBuilder(
+    column: $table.isMega,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isBattleOnly => $composableBuilder(
+    column: $table.isBattleOnly,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get formOrder => $composableBuilder(
+    column: $table.formOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get spriteUrl => $composableBuilder(
+    column: $table.spriteUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get spriteShinyUrl => $composableBuilder(
+    column: $table.spriteShinyUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PokemonTableTableFilterComposer get pokemonId {
+    final $$PokemonTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemonTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonTableTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemonTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> pokemonFormTypesTableRefs(
+    Expression<bool> Function($$PokemonFormTypesTableTableFilterComposer f) f,
+  ) {
+    final $$PokemonFormTypesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.pokemonFormTypesTable,
+          getReferencedColumn: (t) => t.formId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PokemonFormTypesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.pokemonFormTypesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$PokemonFormsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PokemonFormsTableTable> {
+  $$PokemonFormsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get formName => $composableBuilder(
+    column: $table.formName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isMega => $composableBuilder(
+    column: $table.isMega,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isBattleOnly => $composableBuilder(
+    column: $table.isBattleOnly,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get formOrder => $composableBuilder(
+    column: $table.formOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get spriteUrl => $composableBuilder(
+    column: $table.spriteUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get spriteShinyUrl => $composableBuilder(
+    column: $table.spriteShinyUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PokemonTableTableOrderingComposer get pokemonId {
+    final $$PokemonTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemonTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.pokemonTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonFormsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PokemonFormsTableTable> {
+  $$PokemonFormsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get formName =>
+      $composableBuilder(column: $table.formName, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDefault =>
+      $composableBuilder(column: $table.isDefault, builder: (column) => column);
+
+  GeneratedColumn<bool> get isMega =>
+      $composableBuilder(column: $table.isMega, builder: (column) => column);
+
+  GeneratedColumn<bool> get isBattleOnly => $composableBuilder(
+    column: $table.isBattleOnly,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get formOrder =>
+      $composableBuilder(column: $table.formOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get spriteUrl =>
+      $composableBuilder(column: $table.spriteUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get spriteShinyUrl => $composableBuilder(
+    column: $table.spriteShinyUrl,
+    builder: (column) => column,
+  );
+
+  $$PokemonTableTableAnnotationComposer get pokemonId {
+    final $$PokemonTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pokemonId,
+      referencedTable: $db.pokemonTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pokemonTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> pokemonFormTypesTableRefs<T extends Object>(
+    Expression<T> Function($$PokemonFormTypesTableTableAnnotationComposer a) f,
+  ) {
+    final $$PokemonFormTypesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.pokemonFormTypesTable,
+          getReferencedColumn: (t) => t.formId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PokemonFormTypesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.pokemonFormTypesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$PokemonFormsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PokemonFormsTableTable,
+          PokemonFormRow,
+          $$PokemonFormsTableTableFilterComposer,
+          $$PokemonFormsTableTableOrderingComposer,
+          $$PokemonFormsTableTableAnnotationComposer,
+          $$PokemonFormsTableTableCreateCompanionBuilder,
+          $$PokemonFormsTableTableUpdateCompanionBuilder,
+          (PokemonFormRow, $$PokemonFormsTableTableReferences),
+          PokemonFormRow,
+          PrefetchHooks Function({
+            bool pokemonId,
+            bool pokemonFormTypesTableRefs,
+          })
+        > {
+  $$PokemonFormsTableTableTableManager(
+    _$AppDatabase db,
+    $PokemonFormsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PokemonFormsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PokemonFormsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PokemonFormsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> pokemonId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> formName = const Value.absent(),
+                Value<bool> isDefault = const Value.absent(),
+                Value<bool> isMega = const Value.absent(),
+                Value<bool> isBattleOnly = const Value.absent(),
+                Value<int?> formOrder = const Value.absent(),
+                Value<String?> spriteUrl = const Value.absent(),
+                Value<String?> spriteShinyUrl = const Value.absent(),
+              }) => PokemonFormsTableCompanion(
+                id: id,
+                pokemonId: pokemonId,
+                name: name,
+                formName: formName,
+                isDefault: isDefault,
+                isMega: isMega,
+                isBattleOnly: isBattleOnly,
+                formOrder: formOrder,
+                spriteUrl: spriteUrl,
+                spriteShinyUrl: spriteShinyUrl,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int pokemonId,
+                required String name,
+                Value<String?> formName = const Value.absent(),
+                required bool isDefault,
+                required bool isMega,
+                required bool isBattleOnly,
+                Value<int?> formOrder = const Value.absent(),
+                Value<String?> spriteUrl = const Value.absent(),
+                Value<String?> spriteShinyUrl = const Value.absent(),
+              }) => PokemonFormsTableCompanion.insert(
+                id: id,
+                pokemonId: pokemonId,
+                name: name,
+                formName: formName,
+                isDefault: isDefault,
+                isMega: isMega,
+                isBattleOnly: isBattleOnly,
+                formOrder: formOrder,
+                spriteUrl: spriteUrl,
+                spriteShinyUrl: spriteShinyUrl,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PokemonFormsTableTable, PokemonFormRow>(table),
+                  $$PokemonFormsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({pokemonId = false, pokemonFormTypesTableRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (pokemonFormTypesTableRefs) db.pokemonFormTypesTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (pokemonId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.pokemonId,
+                            referencedTable: $$PokemonFormsTableTableReferences
+                                ._pokemonIdTable(db),
+                            referencedColumn: $$PokemonFormsTableTableReferences
+                                ._pokemonIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (pokemonFormTypesTableRefs)
+                        await $_getPrefetchedDataByColumns<
+                          PokemonFormRow,
+                          $PokemonFormsTableTable,
+                          PokemonFormTypeRow,
+                          $PokemonFormTypesTableTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PokemonFormsTableTableReferences
+                              ._pokemonFormTypesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PokemonFormsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).pokemonFormTypesTableRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'form_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$PokemonFormsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PokemonFormsTableTable,
+      PokemonFormRow,
+      $$PokemonFormsTableTableFilterComposer,
+      $$PokemonFormsTableTableOrderingComposer,
+      $$PokemonFormsTableTableAnnotationComposer,
+      $$PokemonFormsTableTableCreateCompanionBuilder,
+      $$PokemonFormsTableTableUpdateCompanionBuilder,
+      (PokemonFormRow, $$PokemonFormsTableTableReferences),
+      PokemonFormRow,
+      PrefetchHooks Function({bool pokemonId, bool pokemonFormTypesTableRefs})
+    >;
+typedef $$PokemonFormTypesTableTableCreateCompanionBuilder =
+    PokemonFormTypesTableCompanion Function({
+      required int formId,
+      required int typeId,
+      required int slot,
+      Value<int> rowid,
+    });
+typedef $$PokemonFormTypesTableTableUpdateCompanionBuilder =
+    PokemonFormTypesTableCompanion Function({
+      Value<int> formId,
+      Value<int> typeId,
+      Value<int> slot,
+      Value<int> rowid,
+    });
+
+final class $$PokemonFormTypesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $PokemonFormTypesTableTable,
+          PokemonFormTypeRow
+        > {
+  $$PokemonFormTypesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PokemonFormsTableTable _formIdTable(_$AppDatabase db) => db
+      .pokemonFormsTable
+      .createAlias('pokemon_form_type__form_id__pokemon_form__id');
+
+  $$PokemonFormsTableTableProcessedTableManager get formId {
+    final $_column = $_itemColumn<int>('form_id')!;
+
+    final manager = $$PokemonFormsTableTableTableManager(
+      $_db,
+      $_db.pokemonFormsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_formIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TypesTableTable _typeIdTable(_$AppDatabase db) =>
+      db.typesTable.createAlias('pokemon_form_type__type_id__type__id');
+
+  $$TypesTableTableProcessedTableManager get typeId {
+    final $_column = $_itemColumn<int>('type_id')!;
+
+    final manager = $$TypesTableTableTableManager(
+      $_db,
+      $_db.typesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_typeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PokemonFormTypesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PokemonFormTypesTableTable> {
+  $$PokemonFormTypesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get slot => $composableBuilder(
+    column: $table.slot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PokemonFormsTableTableFilterComposer get formId {
+    final $$PokemonFormsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.formId,
+      referencedTable: $db.pokemonFormsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonFormsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.pokemonFormsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TypesTableTableFilterComposer get typeId {
+    final $$TypesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.typeId,
+      referencedTable: $db.typesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TypesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.typesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonFormTypesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PokemonFormTypesTableTable> {
+  $$PokemonFormTypesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get slot => $composableBuilder(
+    column: $table.slot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PokemonFormsTableTableOrderingComposer get formId {
+    final $$PokemonFormsTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.formId,
+      referencedTable: $db.pokemonFormsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PokemonFormsTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.pokemonFormsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TypesTableTableOrderingComposer get typeId {
+    final $$TypesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.typeId,
+      referencedTable: $db.typesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TypesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.typesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonFormTypesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PokemonFormTypesTableTable> {
+  $$PokemonFormTypesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get slot =>
+      $composableBuilder(column: $table.slot, builder: (column) => column);
+
+  $$PokemonFormsTableTableAnnotationComposer get formId {
+    final $$PokemonFormsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.formId,
+          referencedTable: $db.pokemonFormsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PokemonFormsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.pokemonFormsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$TypesTableTableAnnotationComposer get typeId {
+    final $$TypesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.typeId,
+      referencedTable: $db.typesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TypesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.typesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PokemonFormTypesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PokemonFormTypesTableTable,
+          PokemonFormTypeRow,
+          $$PokemonFormTypesTableTableFilterComposer,
+          $$PokemonFormTypesTableTableOrderingComposer,
+          $$PokemonFormTypesTableTableAnnotationComposer,
+          $$PokemonFormTypesTableTableCreateCompanionBuilder,
+          $$PokemonFormTypesTableTableUpdateCompanionBuilder,
+          (PokemonFormTypeRow, $$PokemonFormTypesTableTableReferences),
+          PokemonFormTypeRow,
+          PrefetchHooks Function({bool formId, bool typeId})
+        > {
+  $$PokemonFormTypesTableTableTableManager(
+    _$AppDatabase db,
+    $PokemonFormTypesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PokemonFormTypesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PokemonFormTypesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PokemonFormTypesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> formId = const Value.absent(),
+                Value<int> typeId = const Value.absent(),
+                Value<int> slot = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PokemonFormTypesTableCompanion(
+                formId: formId,
+                typeId: typeId,
+                slot: slot,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int formId,
+                required int typeId,
+                required int slot,
+                Value<int> rowid = const Value.absent(),
+              }) => PokemonFormTypesTableCompanion.insert(
+                formId: formId,
+                typeId: typeId,
+                slot: slot,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PokemonFormTypesTableTable, PokemonFormTypeRow>(
+                    table,
+                  ),
+                  $$PokemonFormTypesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({formId = false, typeId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (formId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.formId,
+                        referencedTable: $$PokemonFormTypesTableTableReferences
+                            ._formIdTable(db),
+                        referencedColumn: $$PokemonFormTypesTableTableReferences
+                            ._formIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (typeId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.typeId,
+                        referencedTable: $$PokemonFormTypesTableTableReferences
+                            ._typeIdTable(db),
+                        referencedColumn: $$PokemonFormTypesTableTableReferences
+                            ._typeIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PokemonFormTypesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PokemonFormTypesTableTable,
+      PokemonFormTypeRow,
+      $$PokemonFormTypesTableTableFilterComposer,
+      $$PokemonFormTypesTableTableOrderingComposer,
+      $$PokemonFormTypesTableTableAnnotationComposer,
+      $$PokemonFormTypesTableTableCreateCompanionBuilder,
+      $$PokemonFormTypesTableTableUpdateCompanionBuilder,
+      (PokemonFormTypeRow, $$PokemonFormTypesTableTableReferences),
+      PokemonFormTypeRow,
+      PrefetchHooks Function({bool formId, bool typeId})
     >;
 typedef $$TypeEfficacyTableTableCreateCompanionBuilder =
     TypeEfficacyTableCompanion Function({
@@ -14435,6 +16456,10 @@ class $AppDatabaseManager {
       $$TypesTableTableTableManager(_db, _db.typesTable);
   $$PokemonTypesTableTableTableManager get pokemonTypesTable =>
       $$PokemonTypesTableTableTableManager(_db, _db.pokemonTypesTable);
+  $$PokemonFormsTableTableTableManager get pokemonFormsTable =>
+      $$PokemonFormsTableTableTableManager(_db, _db.pokemonFormsTable);
+  $$PokemonFormTypesTableTableTableManager get pokemonFormTypesTable =>
+      $$PokemonFormTypesTableTableTableManager(_db, _db.pokemonFormTypesTable);
   $$TypeEfficacyTableTableTableManager get typeEfficacyTable =>
       $$TypeEfficacyTableTableTableManager(_db, _db.typeEfficacyTable);
   $$AbilitiesTableTableTableManager get abilitiesTable =>
