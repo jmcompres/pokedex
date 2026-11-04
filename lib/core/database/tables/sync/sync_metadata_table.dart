@@ -1,11 +1,6 @@
 import 'package:drift/drift.dart';
 
-enum SyncStatusDb {
-  idle,
-  syncing,
-  completed,
-  failed
-}
+enum SyncStatusDb { idle, syncing, completed, failed }
 
 @DataClassName('SyncMetadataRow')
 class SyncMetadataTable extends Table {

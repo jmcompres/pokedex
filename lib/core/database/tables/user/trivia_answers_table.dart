@@ -9,8 +9,11 @@ class TriviaAnswersTable extends Table {
 
   IntColumn get id => integer().autoIncrement()();
 
-
-  IntColumn get triviaResultId => integer().references(TriviaResultsTable, #id, onDelete: KeyAction.cascade)();
+  IntColumn get triviaResultId => integer().references(
+    TriviaResultsTable,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
 
   // Sin FK porque es un registro histórico de la partida y no debe impedir operaciones sobre el catálogo
   IntColumn get pokemonId => integer()();

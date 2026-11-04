@@ -8,7 +8,11 @@ class PokemonFormTypesTable extends Table {
   @override
   String get tableName => 'pokemon_form_type';
 
-  IntColumn get formId => integer().references(PokemonFormsTable, #id, onDelete: KeyAction.cascade)();
+  IntColumn get formId => integer().references(
+    PokemonFormsTable,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
   IntColumn get typeId => integer().references(TypesTable, #id)();
   IntColumn get slot => integer()();
 
