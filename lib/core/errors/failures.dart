@@ -27,3 +27,7 @@ class CacheFailure extends Failure {
 class RateLimitFailure extends Failure {
   const RateLimitFailure({super.debugMessage});
 }
+
+class ValidationFailure extends Failure {
+  const ValidationFailure({super.debugMessage});
+}
