@@ -446,4 +446,39 @@ void main() {
       expect(eventos.current, 1);
     });
   });
+
+  group('esquema', () {
+    test('tiene las 21 tablas y los índices documentados', () async {
+      final tablas = await db
+          .customSelect(
+            'SELECT name FROM sqlite_master '
+            "WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
+          )
+          .get();
+      expect(tablas, hasLength(21));
+
+      final indices =
+          (await db
+                  .customSelect(
+                    'SELECT name FROM sqlite_master '
+                    "WHERE type = 'index' AND name LIKE 'idx_%'",
+                  )
+                  .get())
+              .map((r) => r.read<String>('name'))
+              .toSet();
+
+      expect(indices, {
+        'idx_species_generation',
+        'idx_species_chain',
+        'idx_pokemon_name',
+        'idx_pokemon_species',
+        'idx_pokemon_bst',
+        'idx_pokemon_type_type',
+        'idx_pokemon_form_pokemon',
+        'idx_pokemon_ability_ability',
+        'idx_evolution_from',
+        'idx_evolution_to',
+      });
+    });
+  });
 }
