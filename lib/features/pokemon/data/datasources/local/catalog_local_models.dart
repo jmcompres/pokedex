@@ -1,9 +1,10 @@
 import 'package:pokedex/core/database/app_database.dart';
 
 class PokemonWithTypes {
-  PokemonWithTypes(this.pokemon, this.types);
+  PokemonWithTypes(this.pokemon, this.species, this.types);
 
   final PokemonRow pokemon;
+  final SpeciesRow species;
   final List<TypeRow> types;
 }
 

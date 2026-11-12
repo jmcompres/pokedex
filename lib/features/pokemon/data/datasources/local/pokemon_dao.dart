@@ -37,6 +37,10 @@ class PokemonDao extends DatabaseAccessor<AppDatabase> with _$PokemonDaoMixin {
   Stream<List<PokemonWithTypes>> watchCatalog() {
     final query =
         select(pokemonTable).join([
+            innerJoin(
+                speciesTable,
+                speciesTable.id.equalsExp(pokemonTable.id),
+            ),
             leftOuterJoin(
               pokemonTypesTable,
               pokemonTypesTable.pokemonId.equalsExp(pokemonTable.id),
@@ -56,10 +60,11 @@ class PokemonDao extends DatabaseAccessor<AppDatabase> with _$PokemonDaoMixin {
       final byId = <int, PokemonWithTypes>{};
       for (final row in rows) {
         final pokemon = row.readTable(pokemonTable);
+        final species = row.readTable(speciesTable);
         final type = row.readTableOrNull(typesTable);
         final entry = byId.putIfAbsent(
           pokemon.id,
-          () => PokemonWithTypes(pokemon, []),
+          () => PokemonWithTypes(pokemon, species, []),
         );
         if (type != null) entry.types.add(type);
       }
