@@ -16,16 +16,14 @@ extension PokemonWithTypesMapper on PokemonWithTypes {
     name: pokemon.name,
     speciesName: species.name,
     isDefault: pokemon.isDefault,
-    types: List<PokemonType>.unmodifiable(
-      types.map((type) => type.toEntity()),
-    ),
+    types: List<PokemonType>.unmodifiable(types.map((type) => type.toEntity())),
     baseStats: BaseStats(
-        hp: pokemon.hp,
-        attack: pokemon.attack,
-        defense: pokemon.defense,
-        specialAttack: pokemon.specialAttack,
-        specialDefense: pokemon.specialDefense,
-        speed: pokemon.speed,
+      hp: pokemon.hp,
+      attack: pokemon.attack,
+      defense: pokemon.defense,
+      specialAttack: pokemon.specialAttack,
+      specialDefense: pokemon.specialDefense,
+      speed: pokemon.speed,
     ),
     images: PokemonImages(
       artworkUrl: pokemon.artworkUrl,
@@ -33,6 +31,6 @@ extension PokemonWithTypesMapper on PokemonWithTypes {
       spriteUrl: pokemon.spriteUrl,
       spriteShinyUrl: pokemon.spriteShinyUrl,
       localArtworkPath: pokemon.artworkLocalPath,
-    )
+    ),
   );
 }

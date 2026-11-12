@@ -37,10 +37,7 @@ class PokemonDao extends DatabaseAccessor<AppDatabase> with _$PokemonDaoMixin {
   Stream<List<PokemonWithTypes>> watchCatalog() {
     final query =
         select(pokemonTable).join([
-            innerJoin(
-                speciesTable,
-                speciesTable.id.equalsExp(pokemonTable.id),
-            ),
+            innerJoin(speciesTable, speciesTable.id.equalsExp(pokemonTable.id)),
             leftOuterJoin(
               pokemonTypesTable,
               pokemonTypesTable.pokemonId.equalsExp(pokemonTable.id),

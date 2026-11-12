@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:pokedex/core/errors/failures.dart';
 
 sealed class SyncStatus extends Equatable {
@@ -21,8 +20,8 @@ final class SyncInProgress extends SyncStatus {
 
   double? get progress {
     final total = this.total;
-    if (total==null || total==0) return null;
-    return synced/total;
+    if (total == null || total == 0) return null;
+    return synced / total;
   }
 
   @override

@@ -21,6 +21,12 @@ class BaseStats extends Equatable {
       hp + attack + defense + specialAttack + specialDefense + speed;
 
   @override
-  List<Object?> get props =>
-      [hp, attack, defense, specialAttack, specialDefense, speed];
+  List<Object?> get props => [
+    hp,
+    attack,
+    defense,
+    specialAttack,
+    specialDefense,
+    speed,
+  ];
 }
