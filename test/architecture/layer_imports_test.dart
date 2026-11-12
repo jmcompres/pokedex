@@ -34,6 +34,8 @@ void main() {
   test('domain no depende de Flutter, Drift, GraphQL ni de la capa data', () {
     verificarCapa('domain', [
       'package:flutter',
+      'package:material_ui',
+      'package:cupertino_ui',
       'package:drift',
       'package:graphql',
       'package:ferry',
