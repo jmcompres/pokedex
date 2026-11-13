@@ -1,6 +1,11 @@
-sealed class Failure {
+import 'package:equatable/equatable.dart';
+
+sealed class Failure extends Equatable {
   final String? debugMessage;
   const Failure({this.debugMessage});
+
+  @override
+  List<Object?> get props => const [];
 }
 
 class NetworkFailure extends Failure {
@@ -14,6 +19,9 @@ class TimeoutFailure extends Failure {
 class ServerFailure extends Failure {
   final int? statusCode;
   const ServerFailure({super.debugMessage, this.statusCode});
+
+  @override
+  List<Object?> get props => [statusCode];
 }
 
 class GraphQLFailure extends Failure {
