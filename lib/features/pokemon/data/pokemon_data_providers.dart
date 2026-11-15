@@ -1,8 +1,31 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/core/database/database_providers.dart';
+import 'package:pokedex/core/sync/sync_providers.dart';
+import 'package:pokedex/features/pokemon/domain/repositories/pokemon_repository.dart';
 
 import 'datasources/local/pokemon_dao.dart';
+import 'datasources/remote/pokemon_remote_datasource.dart';
+import 'repositories/pokemon_repository_impl.dart';
+import 'sync/catalog_sync_coordinator.dart';
 
 final pokemonDaoProvider = Provider<PokemonDao>(
   (ref) => PokemonDao(ref.watch(appDatabaseProvider)),
+);
+
+final catalogSyncCoordinatorProvider = Provider<CatalogSyncCoordinator>((ref) {
+  final coordinator = CatalogSyncCoordinator(
+    remote: ref.watch(pokemonRemoteDataSourceProvider),
+    pokemonDao: ref.watch(pokemonDaoProvider),
+    syncMetadataDao: ref.watch(syncMetadataDaoProvider),
+  );
+  ref.onDispose(coordinator.dispose);
+  return coordinator;
+});
+
+final pokemonRepositoryProvider = Provider<PokemonRepository>(
+  (ref) => PokemonRepositoryImpl(
+    pokemonDao: ref.watch(pokemonDaoProvider),
+    syncMetadataDao: ref.watch(syncMetadataDaoProvider),
+    coordinator: ref.watch(catalogSyncCoordinatorProvider),
+  ),
 );
