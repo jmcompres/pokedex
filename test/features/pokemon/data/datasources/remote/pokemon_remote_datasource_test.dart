@@ -19,8 +19,9 @@ class FakeGraphQLService implements GraphQLService {
   @override
   Future<QueryResult<Object?>> performQuery(
     String query, {
-    String? operationName,
-    Map<String, dynamic>? variables,
+    required String operationName,
+    Map<String, dynamic> variables = const {},
+    Duration timeout = const Duration(seconds: 15),
   }) async {
     lastQuery = query;
     lastOperationName = operationName;
@@ -34,7 +35,7 @@ class FakeGraphQLService implements GraphQLService {
       options: QueryOptions(
         document: gql(query),
         operationName: operationName,
-        variables: variables ?? const <String, dynamic>{},
+        variables: variables,
       ),
       data: nextData,
       source: QueryResultSource.network,

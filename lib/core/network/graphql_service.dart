@@ -29,6 +29,7 @@ class GraphQLService {
     String query, {
     required String operationName,
     Map<String, dynamic> variables = const {},
+    Duration timeout = _timeout,
   }) async {
     final QueryOptions options = QueryOptions(
       document: gql(query),
@@ -39,14 +40,14 @@ class GraphQLService {
     final stopwatch = Stopwatch()..start();
 
     try {
-      final QueryResult result = await _client.query(options).timeout(_timeout);
+      final QueryResult result = await _client.query(options).timeout(timeout);
       if (result.hasException) {
         throw _mapGraphQLException(result.exception!);
       }
       return result;
     } on TimeoutException {
-      throw const TimeoutFailure(
-        debugMessage: 'La petición superó los 15 segundos',
+      throw TimeoutFailure(
+        debugMessage: 'La petición superó los ${timeout.inSeconds} segundos',
       );
     } on SocketException {
       throw const NetworkFailure(debugMessage: 'No hay conexión a Internet');
