@@ -19,11 +19,16 @@ final graphQLHealthCheckProvider = Provider<GraphQLHealthCheck>((ref) {
   return PokeApiGraphQLHealthCheck(ref.watch(graphqlServiceProvider));
 });
 
+final onServiceReconnectedProvider = Provider<OnServiceReconnected?>((ref) {
+  return null;
+});
+
 final serviceAvailabilityMonitorProvider = Provider<ServiceAvailabilityMonitor>(
   (ref) {
     final monitor = ServiceAvailabilityMonitor(
       connectivitySource: ref.watch(networkConnectivitySourceProvider),
       healthCheck: ref.watch(graphQLHealthCheckProvider),
+      onReconnected: ref.watch(onServiceReconnectedProvider),
     );
 
     unawaited(monitor.initialize());

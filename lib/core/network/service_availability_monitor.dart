@@ -3,17 +3,20 @@ import 'dart:async';
 import 'network_contracts.dart';
 import 'service_availability.dart';
 
+typedef OnServiceReconnected = Future<void> Function();
+
 class ServiceAvailabilityMonitor {
   ServiceAvailabilityMonitor({
     required this.connectivitySource,
     required this.healthCheck,
     this.offlineDebounceDuration = const Duration(milliseconds: 1500),
+    this.onReconnected,
   });
 
   final NetworkConnectivitySource connectivitySource;
   final GraphQLHealthCheck healthCheck;
-
   final Duration offlineDebounceDuration;
+  final OnServiceReconnected? onReconnected;
 
   final StreamController<ServiceAvailability> _controller =
       StreamController<ServiceAvailability>.broadcast();
@@ -24,7 +27,7 @@ class ServiceAvailabilityMonitor {
   ServiceAvailability _currentStatus = ServiceAvailability.verifying;
   bool _isInitialized = false;
   bool _isDisposed = false;
-
+  bool _wasOffline = false;
   int _checkGeneration = 0;
 
   ServiceAvailability get currentStatus => _currentStatus;
@@ -144,10 +147,32 @@ class ServiceAvailabilityMonitor {
 
   void _emitStatus(ServiceAvailability newStatus) {
     if (_isDisposed || _currentStatus == newStatus) return;
+
+    if (newStatus == ServiceAvailability.offline) {
+      _wasOffline = true;
+    }
+
+    final shouldTriggerAutoSync =
+        newStatus == ServiceAvailability.online && _wasOffline;
+
+    if (newStatus == ServiceAvailability.online) {
+      _wasOffline = false;
+    }
+
     _currentStatus = newStatus;
     if (!_controller.isClosed) {
       _controller.add(newStatus);
     }
+
+    if (shouldTriggerAutoSync && onReconnected != null) {
+      unawaited(_safeTriggerReconnectSync());
+    }
+  }
+
+  Future<void> _safeTriggerReconnectSync() async {
+    try {
+      await onReconnected?.call();
+    } catch (_) {}
   }
 
   void _cancelOfflineDebounce() {
