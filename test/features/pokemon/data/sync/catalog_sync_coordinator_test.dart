@@ -1,0 +1,97 @@
+import 'dart:math';
+
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:pokedex/core/database/app_database.dart';
+import 'package:pokedex/core/errors/failures.dart';
+import 'package:pokedex/core/sync/sync_metadata_dao.dart';
+import 'package:pokedex/core/utils/result.dart';
+import 'package:pokedex/features/pokemon/data/datasources/local/pokemon_dao.dart';
+import 'package:pokedex/features/pokemon/data/datasources/remote/pokemon_remote_datasource.dart';
+import 'package:pokedex/features/pokemon/data/datasources/remote/pokemon_remote_dtos.dart';
+import 'package:pokedex/features/pokemon/data/sync/catalog_sync_coordinator.dart';
+
+class _PokeApiFalsa implements PokemonRemoteDataSource {
+  final llamadas = <String>[];
+  int? fallarEnOffset;
+
+  @override
+  Future<ReferenceDataDto> fetchReferenceData() async {
+    llamadas.add('reference');
+    return const ReferenceDataDto(
+      types: [TypeDto(id: 1, name: 'normal')],
+      typeEfficacy: [],
+      generations: [GenerationDto(id: 1, name: 'generation-i')],
+      versionGroups: [],
+      eggGroups: [],
+    );
+  }
+
+  @override
+  Future<int> fetchPokemonCount() async => 120;
+
+  @override
+  Future<List<PokemonDto>> fetchPokemonPage({
+    int limit = PokemonRemoteDataSource.defaultPageSize,
+    required int offset,
+  }) async {
+    llamadas.add('page:$offset');
+    if (offset == fallarEnOffset) {
+      fallarEnOffset = null;
+      throw const NetworkFailure();
+    }
+    return [
+      for (var id = offset + 1; id <= min(offset + limit, 120); id++)
+        PokemonDto(
+          id: id,
+          name: 'pokemon-$id',
+          isDefault: true,
+          species: SpeciesDto(id: id, name: 'especie-$id', generationId: 1),
+          forms: [
+            PokemonFormDto(
+              id: id,
+              name: 'pokemon-$id',
+              isDefault: true,
+              isMega: false,
+              isBattleOnly: false,
+            ),
+          ],
+          types: const [PokemonTypeSlotDto(slot: 1, typeId: 1)],
+          stats: [
+            for (final stat in PokemonDto.requiredStats)
+              PokemonStatDto(baseStat: 50, name: stat),
+          ],
+          sprites: const PokemonSpritesDto(),
+        ),
+    ];
+  }
+}
+
+void main() {
+  test('sincroniza todo, reanuda tras un corte y no duplica', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final dao = PokemonDao(db);
+    final api = _PokeApiFalsa()..fallarEnOffset = 100;
+    final sync = CatalogSyncCoordinator(
+      remote: api,
+      pokemonDao: dao,
+      syncMetadataDao: SyncMetadataDao(db),
+    );
+    addTearDown(sync.dispose);
+    Future<int> guardados() async => (await dao.countByTable())['pokemon']!;
+
+    expect(await sync.syncCatalog(), isA<Err<void, Failure>>());
+    expect(api.llamadas, ['reference', 'page:0', 'page:50', 'page:100']);
+    expect(await guardados(), 100);
+
+    api.llamadas.clear();
+    expect(await sync.syncCatalog(), isA<Ok<void, Failure>>());
+    expect(api.llamadas, ['page:100']);
+    expect(await guardados(), 120);
+
+    final antes = await dao.countByTable();
+    await sync.syncCatalog(force: true);
+    expect(await dao.countByTable(), antes);
+  });
+}
