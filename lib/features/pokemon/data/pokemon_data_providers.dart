@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/core/database/database_providers.dart';
+import 'package:pokedex/core/sync/domain/sync_status.dart';
 import 'package:pokedex/core/sync/sync_providers.dart';
 import 'package:pokedex/features/pokemon/domain/repositories/pokemon_repository.dart';
 
@@ -29,3 +30,13 @@ final pokemonRepositoryProvider = Provider<PokemonRepository>(
     coordinator: ref.watch(catalogSyncCoordinatorProvider),
   ),
 );
+
+final catalogSyncStatusStreamProvider = StreamProvider<SyncStatus>((ref) {
+  final coordinator = ref.watch(catalogSyncCoordinatorProvider);
+  return coordinator.watchStatus();
+});
+
+final catalogSyncStatusProvider = Provider<SyncStatus>((ref) {
+  final asyncStatus = ref.watch(catalogSyncStatusStreamProvider);
+  return asyncStatus.value ?? const SyncIdle();
+});
