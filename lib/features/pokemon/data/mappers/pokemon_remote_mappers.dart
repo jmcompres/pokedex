@@ -120,6 +120,8 @@ extension PokemonDtoMapper on PokemonDto {
   }
 
   List<PokemonFormsTableCompanion> toFormCompanions() {
+    final soloUnaForma = forms.length == 1;
+
     return forms
         .map(
           (f) => PokemonFormsTableCompanion(
@@ -127,7 +129,7 @@ extension PokemonDtoMapper on PokemonDto {
             pokemonId: Value(id),
             name: Value(f.name),
             formName: Value(f.formName),
-            isDefault: Value(f.isDefault),
+            isDefault: Value(soloUnaForma || f.isDefault),
             isMega: Value(f.isMega),
             isBattleOnly: Value(f.isBattleOnly),
             formOrder: Value(f.formOrder),
