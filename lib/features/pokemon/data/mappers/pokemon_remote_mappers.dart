@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:drift/drift.dart';
 import 'package:pokedex/core/database/app_database.dart';
 import 'package:pokedex/features/pokemon/data/datasources/local/catalog_local_models.dart';
@@ -64,6 +66,11 @@ extension ReferenceDataDtoMapper on ReferenceDataDto {
       versionGroups: versionGroups.map((e) => e.toCompanion()).toList(),
       eggGroups: eggGroups.map((e) => e.toCompanion()).toList(),
     );
+  }
+
+  Future<ReferenceData> toLocalAsync() {
+    final dto = this;
+    return Isolate.run(dto.toLocal);
   }
 }
 
@@ -174,5 +181,10 @@ extension PokemonPageMapper on List<PokemonDto> {
       forms: expand((dto) => dto.toFormCompanions()).toList(),
       formTypes: expand((dto) => dto.toFormTypeCompanions()).toList(),
     );
+  }
+
+  Future<CatalogPage> toCatalogPageAsync({DateTime? updatedAt}) {
+    final page = this;
+    return Isolate.run(() => page.toCatalogPage(updatedAt: updatedAt));
   }
 }
