@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:pokedex/core/images/pokemon_image_cache.dart';
 import 'package:pokedex/core/network/network_providers.dart';
 import 'package:pokedex/core/sync/sync_providers.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_data_providers.dart';
 
 Future<void> bootstrap(Widget Function() builder) async {
   WidgetsFlutterBinding.ensureInitialized();
+  PokemonImageCache.configureMemoryCache();
 
   final container = ProviderContainer(
     overrides: [
