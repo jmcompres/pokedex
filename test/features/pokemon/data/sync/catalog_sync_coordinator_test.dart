@@ -3,8 +3,11 @@ import 'dart:math';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pokedex/core/database/app_database.dart';
+import 'package:pokedex/core/database/tables/sync/sync_metadata_table.dart';
 import 'package:pokedex/core/errors/failures.dart';
+import 'package:pokedex/core/sync/domain/sync_status.dart';
 import 'package:pokedex/core/sync/sync_metadata_dao.dart';
+import 'package:pokedex/core/sync/sync_resource_keys.dart';
 import 'package:pokedex/core/utils/result.dart';
 import 'package:pokedex/features/pokemon/data/datasources/local/pokemon_dao.dart';
 import 'package:pokedex/features/pokemon/data/datasources/remote/pokemon_remote_datasource.dart';
@@ -93,5 +96,61 @@ void main() {
     final antes = await dao.countByTable();
     await sync.syncCatalog(force: true);
     expect(await dao.countByTable(), antes);
+  });
+
+  test('PA-01: primera ejecución emite lotes progresivos en Drift y registra last_success_at al completarse', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final dao = PokemonDao(db);
+    final metadataDao = SyncMetadataDao(db);
+    final api = _PokeApiFalsa();
+    final sync = CatalogSyncCoordinator(
+      remote: api,
+      pokemonDao: dao,
+      syncMetadataDao: metadataDao,
+    );
+    addTearDown(sync.dispose);
+
+    final conteosEmitidos = <int>[];
+    final estadosEmitidos = <SyncStatus>[];
+
+    final catalogSub = dao
+        .watchCatalog()
+        .map((rows) => rows.length)
+        .listen(conteosEmitidos.add);
+    final statusSub = sync.watchStatus().listen(estadosEmitidos.add);
+    addTearDown(catalogSub.cancel);
+    addTearDown(statusSub.cancel);
+
+    final resultado = await sync.syncCatalog();
+    expect(resultado, isA<Ok<void, Failure>>());
+
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+
+    expect(conteosEmitidos, containsAllInOrder([50, 100, 120]));
+
+    expect(
+      estadosEmitidos,
+      containsAllInOrder([
+        const SyncIdle(),
+        const SyncInProgress(synced: 0),
+        const SyncInProgress(synced: 0, total: 120),
+        const SyncInProgress(synced: 50, total: 120),
+        const SyncInProgress(synced: 100, total: 120),
+        const SyncInProgress(synced: 120, total: 120),
+        const SyncCompleted(),
+      ]),
+    );
+
+    final metaCatalog = await metadataDao.get(SyncResourceKeys.catalog);
+    final metaReference = await metadataDao.get(SyncResourceKeys.reference);
+
+    expect(metaReference?.status, SyncStatusDb.completed);
+    expect(metaReference?.lastSuccessAt, isNotNull);
+
+    expect(metaCatalog?.status, SyncStatusDb.completed);
+    expect(metaCatalog?.lastSuccessAt, isNotNull);
+    expect(metaCatalog?.nextOffset, 120);
+    expect(metaCatalog?.totalCount, 120);
   });
 }
