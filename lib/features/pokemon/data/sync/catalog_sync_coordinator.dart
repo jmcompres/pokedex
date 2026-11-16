@@ -129,7 +129,9 @@ class CatalogSyncCoordinator {
     final cortada =
         meta.status == SyncStatusDb.syncing ||
         meta.status == SyncStatusDb.failed;
-    return cortada ? meta.nextOffset : 0;
+    final total = meta.totalCount;
+    final faltanPaginas = total == null || meta.nextOffset < total;
+    return cortada && faltanPaginas ? meta.nextOffset : 0;
   }
 
   bool _isFresh(SyncMetadataRow? meta, Duration maxAge) {

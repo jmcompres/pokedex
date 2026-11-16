@@ -96,6 +96,13 @@ void main() {
     final antes = await dao.countByTable();
     await sync.syncCatalog(force: true);
     expect(await dao.countByTable(), antes);
+
+    api.llamadas.clear();
+    api.fallarEnOffset = 0;
+    expect(await sync.syncCatalog(force: true), isA<Err<void, Failure>>());
+    api.llamadas.clear();
+    await sync.syncCatalog();
+    expect(api.llamadas, ['page:0', 'page:50', 'page:100']);
   });
 
   test('PA-01: primera ejecución emite lotes progresivos en Drift y registra last_success_at al completarse', () async {
