@@ -129,8 +129,6 @@ AppBar _buildAppBar() => AppBar(
   ),
 );
 
-//Datos (estado)
-
 class _CatalogList extends StatelessWidget {
   const _CatalogList({
     required this.pokemon,
@@ -292,8 +290,6 @@ class _SyncBanner extends StatelessWidget {
   }
 }
 
-//carga de filas y esqueleto (estado)
-
 class _SkeletonList extends StatelessWidget {
   const _SkeletonList();
 
@@ -358,8 +354,6 @@ Widget _bar(double width, double height, {double radius = 999}) => Container(
     borderRadius: BorderRadius.circular(radius),
   ),
 );
-
-// Vacio y error (estado)
 
 class _MessageView extends StatelessWidget {
   const _MessageView({
@@ -529,7 +523,7 @@ class _RetryButton extends StatelessWidget {
       onPressed: onPressed,
       style: FilledButton.styleFrom(
         backgroundColor: _buttonBlue,
-        minimumSize: const Size(0, 42),
+        minimumSize: const Size(48, 48),
         padding: const EdgeInsets.symmetric(horizontal: 22),
         textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
       ),
@@ -538,8 +532,6 @@ class _RetryButton extends StatelessWidget {
     );
   }
 }
-
-//piezas que se cmparten
 
 class _Pokeball extends StatelessWidget {
   const _Pokeball({
