@@ -44,9 +44,8 @@ CatalogState resolveCatalogState(
     ),
 
     AsyncData() => switch (sync) {
-      SyncFailed(failure: NetworkFailure()) => const CatalogEmpty(
-        offline: true,
-      ),
+      SyncFailed(failure: NetworkFailure()) ||
+      SyncWaitingRetry() => const CatalogEmpty(offline: true),
       SyncFailed(:final failure) => CatalogError(failure),
       SyncCompleted() => const CatalogEmpty(offline: false),
       SyncInProgress() || SyncIdle() || null => const CatalogLoading(),
