@@ -4,6 +4,8 @@ import 'package:pokedex/core/errors/failures.dart';
 sealed class SyncStatus extends Equatable {
   const SyncStatus();
 
+  bool get isActive => this is SyncInProgress || this is SyncWaitingRetry;
+
   @override
   List<Object?> get props => const [];
 }
@@ -26,6 +28,15 @@ final class SyncInProgress extends SyncStatus {
 
   @override
   List<Object?> get props => [synced, total];
+}
+
+final class SyncWaitingRetry extends SyncStatus {
+  const SyncWaitingRetry({this.retryIn});
+
+  final Duration? retryIn;
+
+  @override
+  List<Object?> get props => [retryIn];
 }
 
 final class SyncCompleted extends SyncStatus {
