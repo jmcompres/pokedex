@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/core/errors/failures.dart';
 import 'package:pokedex/core/sync/domain/sync_status.dart';
@@ -14,10 +15,10 @@ final class CatalogLoading extends CatalogState {
 }
 
 final class CatalogLoaded extends CatalogState {
-  const CatalogLoaded(this.pokemon, {this.isSyncing = false});
+  const CatalogLoaded(this.pokemon, {this.syncing});
 
   final List<Pokemon> pokemon;
-  final bool isSyncing;
+  final SyncInProgress? syncing;
 }
 
 final class CatalogEmpty extends CatalogState {
@@ -39,7 +40,7 @@ CatalogState resolveCatalogState(
   return switch (catalog) {
     AsyncData(:final value) when value.isNotEmpty => CatalogLoaded(
       value,
-      isSyncing: sync is SyncInProgress,
+      syncing: sync is SyncInProgress ? sync : null,
     ),
 
     AsyncData() => switch (sync) {
@@ -60,19 +61,20 @@ CatalogState resolveCatalogState(
 }
 
 final catalogStreamProvider = StreamProvider<List<Pokemon>>(
-    (ref) => ref.watch(pokemonRepositoryProvider).watchCatalog()
+  (ref) => ref.watch(pokemonRepositoryProvider).watchCatalog(),
 );
 
 final syncStatusProvider = StreamProvider<SyncStatus>(
-    (ref) => ref.watch(pokemonRepositoryProvider).watchSyncStatus()
+  (ref) => ref.watch(pokemonRepositoryProvider).watchSyncStatus(),
 );
 
 final catalogStateProvider = Provider<CatalogState>((ref) {
   final sync = switch (ref.watch(syncStatusProvider)) {
     AsyncData(:final value) => value,
-    _ => null
+    _ => null,
   };
   return resolveCatalogState(ref.watch(catalogStreamProvider), sync);
 });
 
-void refreshCatalog(WidgetRef ref) => unawaited(ref.read(pokemonRepositoryProvider).refreshCatalog());
+void refreshCatalog(WidgetRef ref) =>
+    unawaited(ref.read(pokemonRepositoryProvider).refreshCatalog());
