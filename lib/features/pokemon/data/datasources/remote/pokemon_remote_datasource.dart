@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/core/errors/failures.dart';
 import 'package:pokedex/core/network/graphql_service.dart';
@@ -30,28 +32,14 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
       operationName: PokemonQueries.getReferenceDataOp,
     );
 
-    try {
-      final data = result.data;
-      if (data == null) {
-        throw const ValidationFailure(
-          debugMessage: 'Respuesta de referencia vacía (data == null)',
-        );
-      }
-
-      final dto = ReferenceDataDto.fromJson(data);
-      if (dto.types.isEmpty || dto.generations.isEmpty) {
-        throw const ValidationFailure(
-          debugMessage: 'Datos de referencia incompletos o vacíos',
-        );
-      }
-      return dto;
-    } on Failure {
-      rethrow;
-    } catch (e) {
-      throw ValidationFailure(
-        debugMessage: 'Error al parsear datos de referencia: $e',
+    final data = result.data;
+    if (data == null) {
+      throw const ValidationFailure(
+        debugMessage: 'Respuesta de referencia vacía (data == null)',
       );
     }
+
+    return Isolate.run(() => _parseReferenceData(data));
   }
 
   @override
@@ -65,28 +53,14 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
       variables: <String, dynamic>{'limit': limit, 'offset': offset},
     );
 
-    try {
-      final rawList = result.data?['pokemon'];
-      if (rawList is! List<dynamic>) {
-        throw const ValidationFailure(
-          debugMessage: 'Respuesta de página inválida: nodo pokemon ausente',
-        );
-      }
-
-      final dtos = rawList
-          .map((e) => PokemonDto.fromJson(e as Map<String, dynamic>))
-          .toList();
-
-      PokemonDto.validatePage(dtos);
-
-      return dtos;
-    } on Failure {
-      rethrow;
-    } catch (e) {
-      throw ValidationFailure(
-        debugMessage: 'Error al parsear página de Pokémon: $e',
+    final rawList = result.data?['pokemon'];
+    if (rawList is! List<dynamic>) {
+      throw const ValidationFailure(
+        debugMessage: 'Respuesta de página inválida: nodo pokemon ausente',
       );
     }
+
+    return Isolate.run(() => _parsePokemonPage(rawList));
   }
 
   @override
@@ -116,6 +90,42 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
         debugMessage: 'Error al parsear conteo de Pokémon: $e',
       );
     }
+  }
+}
+
+ReferenceDataDto _parseReferenceData(Map<String, dynamic> data) {
+  try {
+    final dto = ReferenceDataDto.fromJson(data);
+    if (dto.types.isEmpty || dto.generations.isEmpty) {
+      throw const ValidationFailure(
+        debugMessage: 'Datos de referencia incompletos o vacíos',
+      );
+    }
+    return dto;
+  } on Failure {
+    rethrow;
+  } catch (e) {
+    throw ValidationFailure(
+      debugMessage: 'Error al parsear datos de referencia: $e',
+    );
+  }
+}
+
+List<PokemonDto> _parsePokemonPage(List<dynamic> rawList) {
+  try {
+    final dtos = rawList
+        .map((e) => PokemonDto.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    PokemonDto.validatePage(dtos);
+
+    return dtos;
+  } on Failure {
+    rethrow;
+  } catch (e) {
+    throw ValidationFailure(
+      debugMessage: 'Error al parsear página de Pokémon: $e',
+    );
   }
 }
 

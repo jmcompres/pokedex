@@ -55,8 +55,9 @@ class CatalogSyncCoordinator {
 
       if (needsReference) {
         final data = await remote.fetchReferenceData();
+        final localReference = await data.toLocalAsync();
         await pokemonDao.upsertReferenceData(
-          data.toLocal(),
+          localReference,
           progress: _meta(
             SyncResourceKeys.reference,
             SyncStatusDb.completed,
@@ -68,12 +69,15 @@ class CatalogSyncCoordinator {
       if (needsCatalog) {
         final total = await remote.fetchPokemonCount();
         var offset = _resumeOffset(catalog);
+        _emit(SyncInProgress(synced: offset, total: total));
+
         while (offset < total) {
           final page = await remote.fetchPokemonPage(offset: offset);
           if (page.isEmpty) break;
+          final localPage = await page.toCatalogPageAsync();
           offset += page.length;
           await pokemonDao.upsertCatalogPage(
-            page.toCatalogPage(),
+            localPage,
             progress: _meta(
               SyncResourceKeys.catalog,
               SyncStatusDb.syncing,
@@ -87,6 +91,7 @@ class CatalogSyncCoordinator {
           _meta(
             SyncResourceKeys.catalog,
             SyncStatusDb.completed,
+            nextOffset: offset,
             total: total,
             succeeded: true,
           ),

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/core/errors/failures.dart';
+import 'package:pokedex/core/network/network_providers.dart';
+import 'package:pokedex/core/network/service_availability.dart';
 import 'package:pokedex/core/sync/domain/sync_status.dart';
 import 'package:pokedex/features/pokemon/data/pokemon_data_providers.dart';
 import 'package:pokedex/features/pokemon/domain/entities/pokemon.dart';
@@ -35,8 +37,9 @@ final class CatalogError extends CatalogState {
 
 CatalogState resolveCatalogState(
   AsyncValue<List<Pokemon>> catalog,
-  SyncStatus? sync,
-) {
+  SyncStatus? sync, [
+  ServiceAvailability? availability,
+]) {
   return switch (catalog) {
     AsyncData(:final value) when value.isNotEmpty => CatalogLoaded(
       value,
@@ -46,9 +49,18 @@ CatalogState resolveCatalogState(
     AsyncData() => switch (sync) {
       SyncFailed(failure: NetworkFailure()) ||
       SyncWaitingRetry() => const CatalogEmpty(offline: true),
-      SyncFailed(:final failure) => CatalogError(failure),
-      SyncCompleted() => const CatalogEmpty(offline: false),
-      SyncInProgress() || SyncIdle() || null => const CatalogLoading(),
+      SyncFailed(:final failure) =>
+        availability == ServiceAvailability.offline
+            ? const CatalogEmpty(offline: true)
+            : CatalogError(failure),
+      SyncCompleted() => CatalogEmpty(
+        offline: availability == ServiceAvailability.offline,
+      ),
+      SyncInProgress() => const CatalogLoading(),
+      SyncIdle() || null =>
+        availability == ServiceAvailability.offline
+            ? const CatalogEmpty(offline: true)
+            : const CatalogLoading(),
     },
 
     AsyncError(:final error) => CatalogError(
@@ -72,7 +84,12 @@ final catalogStateProvider = Provider<CatalogState>((ref) {
     AsyncData(:final value) => value,
     _ => null,
   };
-  return resolveCatalogState(ref.watch(catalogStreamProvider), sync);
+  final availability = ref.watch(serviceAvailabilityProvider);
+  return resolveCatalogState(
+    ref.watch(catalogStreamProvider),
+    sync,
+    availability,
+  );
 });
 
 void refreshCatalog(WidgetRef ref) =>
