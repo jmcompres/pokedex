@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:pokedex/core/images/pokemon_image_cache.dart';
 import 'package:pokedex/features/pokemon/domain/entities/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/type_chip.dart';
 
@@ -124,15 +126,15 @@ class _PokemonImage extends StatelessWidget {
       ),
       child: url == null
           ? _imageFallback
-          : Image.network(
-              url,
+          : CachedNetworkImage(
+              imageUrl: url,
+              cacheManager: PokemonImageCache.instance,
               width: _image,
               height: _image,
               fit: BoxFit.contain,
-              cacheWidth: decodeSize,
-              loadingBuilder: (context, child, progress) =>
-                  progress == null ? child : _imageLoading,
-              errorBuilder: (context, error, stackTrace) => _imageFallback,
+              memCacheWidth: decodeSize,
+              placeholder: (context, url) => _imageLoading,
+              errorWidget: (context, url, error) => _imageFallback,
             ),
     );
   }

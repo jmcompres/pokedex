@@ -44,6 +44,8 @@ dependencies:
 
   material_ui: ^1.11.0
   connectivity_plus: ^7.3.2
+  cached_network_image: ^4.0.7
+  flutter_cache_manager: ^3.5.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
