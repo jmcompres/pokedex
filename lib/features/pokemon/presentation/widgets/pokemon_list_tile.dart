@@ -111,7 +111,8 @@ class _PokemonImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = this.url;
-    final decodeSize = (_image * MediaQuery.devicePixelRatioOf(context)).round();
+    final decodeSize = (_image * MediaQuery.devicePixelRatioOf(context))
+        .round();
 
     return Container(
       width: _box,
@@ -124,15 +125,15 @@ class _PokemonImage extends StatelessWidget {
       child: url == null
           ? _imageFallback
           : Image.network(
-        url,
-        width: _image,
-        height: _image,
-        fit: BoxFit.contain,
-        cacheWidth: decodeSize,
-        loadingBuilder: (context, child, progress) =>
-        progress == null ? child : _imageLoading,
-        errorBuilder: (context, error, stackTrace) => _imageFallback,
-      ),
+              url,
+              width: _image,
+              height: _image,
+              fit: BoxFit.contain,
+              cacheWidth: decodeSize,
+              loadingBuilder: (context, child, progress) =>
+                  progress == null ? child : _imageLoading,
+              errorBuilder: (context, error, stackTrace) => _imageFallback,
+            ),
     );
   }
 }

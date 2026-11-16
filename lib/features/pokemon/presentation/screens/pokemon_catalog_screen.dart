@@ -17,15 +17,15 @@ const _listPadding = EdgeInsets.fromLTRB(12, 20, 12, 34);
 typedef _Tone = ({Color foreground, Color background, Color label});
 
 const _emptyTone = (
-foreground: Color(0xFF51647F),
-background: Color(0xFFE7EDF6),
-label: Color(0xFF506785),
+  foreground: Color(0xFF51647F),
+  background: Color(0xFFE7EDF6),
+  label: Color(0xFF506785),
 );
 
 const _errorTone = (
-foreground: Color(0xFF805044),
-background: Color(0xFFF5E4DF),
-label: Color(0xFF8C4D3D),
+  foreground: Color(0xFF805044),
+  background: Color(0xFFF5E4DF),
+  label: Color(0xFF8C4D3D),
 );
 
 class PokemonCatalogScreen extends ConsumerWidget {
@@ -52,7 +52,8 @@ class PokemonCatalogScreen extends ConsumerWidget {
           withPokeball: true,
           label: 'Catálogo aún no descargado',
           title: 'Conéctate a Internet para descargar el catálogo',
-          message: 'Cuando recuperes la conexión, la descarga comenzará '
+          message:
+              'Cuando recuperes la conexión, la descarga comenzará '
               'automáticamente. Después podrás consultarlo sin conexión.',
           action: _WaitingForConnection(onRetry: () => refreshCatalog(ref)),
         ),
@@ -69,7 +70,8 @@ class PokemonCatalogScreen extends ConsumerWidget {
           icon: Icons.cloud_off,
           label: 'No se pudo cargar',
           title: 'No podemos acceder al catálogo',
-          message: '${_failureMessage(failure)} '
+          message:
+              '${_failureMessage(failure)} '
               'No se ha descargado ningún dato todavía.',
           action: retryButton,
         ),
@@ -144,11 +146,14 @@ class _CatalogList extends StatelessWidget {
               padding: _listPadding,
               itemCount: pokemon.length + 1,
               itemBuilder: (context, index) => index == 0
-                  ? _ListHeading(count: pokemon.length, loading: syncing != null)
+                  ? _ListHeading(
+                      count: pokemon.length,
+                      loading: syncing != null,
+                    )
                   : Padding(
-                padding: const EdgeInsets.only(bottom: 9),
-                child: PokemonListTile(pokemon: pokemon[index - 1]),
-              ),
+                      padding: const EdgeInsets.only(bottom: 9),
+                      child: PokemonListTile(pokemon: pokemon[index - 1]),
+                    ),
             ),
           ),
         ),
@@ -524,11 +529,14 @@ class _RetryButton extends StatelessWidget {
   }
 }
 
-
 //piezas que se cmparten
 
 class _Pokeball extends StatelessWidget {
-  const _Pokeball({required this.size, required this.dark, this.outlined = false});
+  const _Pokeball({
+    required this.size,
+    required this.dark,
+    this.outlined = false,
+  });
 
   final double size;
   final Color dark;
@@ -566,17 +574,16 @@ class _Pokeball extends StatelessWidget {
   }
 }
 
-String _thousands(int n) => n
-    .toString()
-    .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
+String _thousands(int n) =>
+    n.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.');
 
 String _failureMessage(Failure failure) => switch (failure) {
   NetworkFailure() => 'No hay conexión a Internet.',
   TimeoutFailure() => 'PokeAPI tardó demasiado en responder.',
   RateLimitFailure() =>
-  'Se hicieron demasiadas solicitudes. Espera un momento.',
-  ServerFailure() || GraphQLFailure() =>
-  'PokeAPI no está respondiendo correctamente.',
+    'Se hicieron demasiadas solicitudes. Espera un momento.',
+  ServerFailure() ||
+  GraphQLFailure() => 'PokeAPI no está respondiendo correctamente.',
   ValidationFailure() => 'PokeAPI envió datos incompletos.',
   CacheFailure() => 'No se pudo leer el catálogo guardado.',
 };
