@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pokedex/core/errors/failures.dart';
+import 'package:pokedex/core/network/service_availability.dart';
 import 'package:pokedex/core/sync/domain/sync_status.dart';
 import 'package:pokedex/features/pokemon/domain/entities/base_stats.dart';
 import 'package:pokedex/features/pokemon/domain/entities/pokemon.dart';
@@ -49,7 +50,7 @@ void main() {
         const AsyncData([]),
         const SyncFailed(NetworkFailure()),
       ),
-      isA<CatalogEmpty>(),
+      isA<CatalogEmpty>().having((s) => s.offline, 'offline', isTrue),
     );
 
     expect(
@@ -58,6 +59,26 @@ void main() {
         const SyncFailed(ServerFailure()),
       ),
       isA<CatalogError>(),
+    );
+  });
+
+  test('PA-15: resuelve CatalogEmpty(offline: true) de inmediato cuando no hay red ni datos locales', () {
+    expect(
+      resolveCatalogState(
+        const AsyncData([]),
+        const SyncIdle(),
+        ServiceAvailability.offline,
+      ),
+      isA<CatalogEmpty>().having((s) => s.offline, 'offline', isTrue),
+    );
+
+    expect(
+      resolveCatalogState(
+        const AsyncData([]),
+        null,
+        ServiceAvailability.offline,
+      ),
+      isA<CatalogEmpty>().having((s) => s.offline, 'offline', isTrue),
     );
   });
 }
