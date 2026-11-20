@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:pokedex/core/images/image_retry_provider.dart';
 import 'package:pokedex/core/images/pokemon_image_cache.dart';
 import 'package:pokedex/features/pokemon/domain/entities/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/type_chip.dart';
@@ -102,7 +104,7 @@ class PokemonListTile extends StatelessWidget {
   }
 }
 
-class _PokemonImage extends StatelessWidget {
+class _PokemonImage extends ConsumerWidget {
   const _PokemonImage({required this.url});
 
   final String? url;
@@ -111,8 +113,9 @@ class _PokemonImage extends StatelessWidget {
   static const _image = 64.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final url = this.url;
+    final retryTick = ref.watch(imageRetryRickProvider);
     final decodeSize = (_image * MediaQuery.devicePixelRatioOf(context))
         .round();
 
@@ -127,6 +130,7 @@ class _PokemonImage extends StatelessWidget {
       child: url == null
           ? _imageFallback
           : CachedNetworkImage(
+              key: ValueKey(retryTick),
               imageUrl: url,
               cacheManager: PokemonImageCache.instance,
               width: _image,
