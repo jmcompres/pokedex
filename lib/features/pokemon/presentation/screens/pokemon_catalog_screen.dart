@@ -3,14 +3,13 @@ import 'dart:math' show pi;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:pokedex/core/errors/failures.dart';
-import 'package:pokedex/core/presentation/connectivity/connectivity_banner.dart';
+import 'package:pokedex/core/presentation/pokedex_scaffold.dart';
 import 'package:pokedex/core/sync/domain/sync_status.dart';
 import 'package:pokedex/features/pokemon/domain/entities/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/controllers/catalog_controller.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/pokemon_list_tile.dart';
 
 const _navy = Color(0xFF1F2B42);
-const _screenBackground = Color(0xFFF9F9FC);
 const _buttonBlue = Color(0xFF344E7D);
 const _skeletonGrey = Color(0xFFEAECF0);
 const _listPadding = EdgeInsets.fromLTRB(12, 20, 12, 34);
@@ -37,55 +36,45 @@ class PokemonCatalogScreen extends ConsumerWidget {
     final state = ref.watch(catalogStateProvider);
     final retryButton = _RetryButton(onPressed: () => refreshCatalog(ref));
 
-    return Scaffold(
-      backgroundColor: _screenBackground,
+    return PokedexScaffold(
       appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          const ConnectivityBanner(),
-          Expanded(
-            child: switch (state) {
-              CatalogLoading() => const _SkeletonList(),
-              CatalogLoaded(:final pokemon, :final syncing) => _CatalogList(
-                pokemon: pokemon,
-                syncing: syncing,
-                onRefresh: () async => refreshCatalog(ref),
-              ),
-              CatalogEmpty(offline: true) => _MessageView(
-                tone: _emptyTone,
-                icon: Icons.cloud_off,
-                withPokeball: true,
-                label: 'Catálogo aún no descargado',
-                title: 'Conéctate a Internet para descargar el catálogo',
-                message:
-                    'Cuando recuperes la conexión, la descarga comenzará '
-                    'automáticamente. Después podrás consultarlo sin conexión.',
-                action: _WaitingForConnection(
-                  onRetry: () => refreshCatalog(ref),
-                ),
-              ),
-              CatalogEmpty() => _MessageView(
-                tone: _emptyTone,
-                icon: Icons.inbox_outlined,
-                label: 'Catálogo vacío',
-                title: 'Todavía no hay Pokémon guardados',
-                message: 'Vuelve a intentar la descarga del catálogo.',
-                action: retryButton,
-              ),
-              CatalogError(:final failure) => _MessageView(
-                tone: _errorTone,
-                icon: Icons.cloud_off,
-                label: 'No se pudo cargar',
-                title: 'No podemos acceder al catálogo',
-                message:
-                    '${_failureMessage(failure)} '
-                    'No se ha descargado ningún dato todavía.',
-                action: retryButton,
-              ),
-            },
-          ),
-        ],
-      ),
+      body: switch (state) {
+        CatalogLoading() => const _SkeletonList(),
+        CatalogLoaded(:final pokemon, :final syncing) => _CatalogList(
+          pokemon: pokemon,
+          syncing: syncing,
+          onRefresh: () async => refreshCatalog(ref),
+        ),
+        CatalogEmpty(offline: true) => _MessageView(
+          tone: _emptyTone,
+          icon: Icons.cloud_off,
+          withPokeball: true,
+          label: 'Catálogo aún no descargado',
+          title: 'Conéctate a Internet para descargar el catálogo',
+          message:
+              'Cuando recuperes la conexión, la descarga comenzará '
+              'automáticamente. Después podrás consultarlo sin conexión.',
+          action: _WaitingForConnection(onRetry: () => refreshCatalog(ref)),
+        ),
+        CatalogEmpty() => _MessageView(
+          tone: _emptyTone,
+          icon: Icons.inbox_outlined,
+          label: 'Catálogo vacío',
+          title: 'Todavía no hay Pokémon guardados',
+          message: 'Vuelve a intentar la descarga del catálogo.',
+          action: retryButton,
+        ),
+        CatalogError(:final failure) => _MessageView(
+          tone: _errorTone,
+          icon: Icons.cloud_off,
+          label: 'No se pudo cargar',
+          title: 'No podemos acceder al catálogo',
+          message:
+              '${_failureMessage(failure)} '
+              'No se ha descargado ningún dato todavía.',
+          action: retryButton,
+        ),
+      },
     );
   }
 }
