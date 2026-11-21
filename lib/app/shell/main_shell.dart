@@ -14,7 +14,7 @@ class MainShell extends StatelessWidget {
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) => navigationShell.goBranch(
           index,
-          initialLocation: index == navigationShell.currentIndex //
+          initialLocation: index == navigationShell.currentIndex, //
         ),
         destinations: const [
           NavigationDestination(

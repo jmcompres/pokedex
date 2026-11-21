@@ -15,32 +15,40 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             MainShell(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.catalog,
-              builder: (context, state) => const PokemonCatalogScreen(),
-            )
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.favorites,
-              builder: (context, state) => const FavoritesScreen()
-            )
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.trivia,
-              builder: (context, state) => const TriviaScreen(),
-            )
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.settings,
-              builder: (context, state) => const SettingsScreen(),
-            )
-          ])
-        ]
-      )
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.catalog,
+                builder: (context, state) => const PokemonCatalogScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.favorites,
+                builder: (context, state) => const FavoritesScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.trivia,
+                builder: (context, state) => const TriviaScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.settings,
+                builder: (context, state) => const SettingsScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
     ],
   );
 });
