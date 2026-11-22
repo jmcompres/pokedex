@@ -44,16 +44,18 @@ class CatalogSyncCoordinator {
   Future<void> dispose() => _statusController.close();
 
   Future<Result<void, Failure>> _run(bool force) async {
+    var activeResource = SyncResourceKeys.catalog;
     try {
       final reference = await syncMetadataDao.get(SyncResourceKeys.reference);
       final catalog = await syncMetadataDao.get(SyncResourceKeys.catalog);
-      final needsReference = !_isFresh(reference, _referenceMaxAge);
+      final needsReference = force || !_isFresh(reference, _referenceMaxAge);
       final needsCatalog = force || !_isFresh(catalog, _catalogMaxAge);
       if (!needsReference && !needsCatalog) return _ok;
 
       _emit(const SyncInProgress(synced: 0));
 
       if (needsReference) {
+        activeResource = SyncResourceKeys.reference;
         final data = await remote.fetchReferenceData();
         final localReference = await data.toLocalAsync();
         await pokemonDao.upsertReferenceData(
@@ -67,6 +69,7 @@ class CatalogSyncCoordinator {
       }
 
       if (needsCatalog) {
+        activeResource = SyncResourceKeys.catalog;
         final total = await remote.fetchPokemonCount();
         var offset = _resumeOffset(catalog);
         _emit(SyncInProgress(synced: offset, total: total));
@@ -101,17 +104,23 @@ class CatalogSyncCoordinator {
       _emit(const SyncCompleted());
       return _ok;
     } on Failure catch (failure) {
-      return _fail(failure);
+      return _fail(failure, resourceKey: activeResource);
     } on Exception catch (error) {
-      return _fail(CacheFailure(debugMessage: '$error'));
+      return _fail(
+        CacheFailure(debugMessage: '$error'),
+        resourceKey: activeResource,
+      );
     }
   }
 
-  Future<Result<void, Failure>> _fail(Failure failure) async {
+  Future<Result<void, Failure>> _fail(
+    Failure failure, {
+    String resourceKey = SyncResourceKeys.catalog,
+  }) async {
     try {
       await syncMetadataDao.save(
         SyncMetadataTableCompanion(
-          resourceKey: const Value(SyncResourceKeys.catalog),
+          resourceKey: Value(resourceKey),
           status: const Value(SyncStatusDb.failed),
           lastError: Value(failure.debugMessage ?? '${failure.runtimeType}'),
           lastAttemptAt: Value(DateTime.now()),

@@ -31,12 +31,13 @@ final class SyncInProgress extends SyncStatus {
 }
 
 final class SyncWaitingRetry extends SyncStatus {
-  const SyncWaitingRetry({this.retryIn});
+  const SyncWaitingRetry({this.retryIn, this.failure});
 
   final Duration? retryIn;
+  final Failure? failure;
 
   @override
-  List<Object?> get props => [retryIn];
+  List<Object?> get props => [retryIn, failure];
 }
 
 final class SyncCompleted extends SyncStatus {

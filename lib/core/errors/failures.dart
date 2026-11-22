@@ -35,6 +35,9 @@ class CacheFailure extends Failure {
 class RateLimitFailure extends Failure {
   final Duration? retryAfter;
   const RateLimitFailure({super.debugMessage, this.retryAfter});
+
+  @override
+  List<Object?> get props => [retryAfter];
 }
 
 class ValidationFailure extends Failure {
