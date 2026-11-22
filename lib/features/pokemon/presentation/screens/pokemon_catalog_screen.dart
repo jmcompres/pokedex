@@ -1,9 +1,11 @@
 import 'dart:math' show pi;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:pokedex/core/errors/failures.dart';
 import 'package:pokedex/core/presentation/pokedex_scaffold.dart';
+import 'package:pokedex/core/router/app_routes.dart';
 import 'package:pokedex/core/sync/domain/sync_status.dart';
 import 'package:pokedex/features/pokemon/domain/entities/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/controllers/catalog_controller.dart';
@@ -149,7 +151,12 @@ class _CatalogList extends StatelessWidget {
                     )
                   : Padding(
                       padding: const EdgeInsets.only(bottom: 9),
-                      child: PokemonListTile(pokemon: pokemon[index - 1]),
+                      child: PokemonListTile(
+                        pokemon: pokemon[index - 1],
+                        onTap: () => context.go(
+                          AppRoutes.catalogDetail(pokemon[index - 1].id),
+                        ),
+                      ),
                     ),
             ),
           ),
