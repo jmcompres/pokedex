@@ -17,10 +17,14 @@ import 'package:pokedex/features/pokemon/data/sync/catalog_sync_coordinator.dart
 class _PokeApiFalsa implements PokemonRemoteDataSource {
   final llamadas = <String>[];
   int? fallarEnOffset;
+  bool fallarEnReference = false;
 
   @override
   Future<ReferenceDataDto> fetchReferenceData() async {
     llamadas.add('reference');
+    if (fallarEnReference) {
+      throw const NetworkFailure(debugMessage: 'Fallo simulado en referencia');
+    }
     return const ReferenceDataDto(
       types: [TypeDto(id: 1, name: 'normal')],
       typeEfficacy: [],
@@ -159,5 +163,61 @@ void main() {
     expect(metaCatalog?.lastSuccessAt, isNotNull);
     expect(metaCatalog?.nextOffset, 120);
     expect(metaCatalog?.totalCount, 120);
+  });
+
+  test('PFL-16: refresco forzado (force: true) vuelve a solicitar los datos de referencia', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final dao = PokemonDao(db);
+    final metadataDao = SyncMetadataDao(db);
+    final api = _PokeApiFalsa();
+    final sync = CatalogSyncCoordinator(
+      remote: api,
+      pokemonDao: dao,
+      syncMetadataDao: metadataDao,
+    );
+    addTearDown(sync.dispose);
+
+    // Primera sincronización para completar referencia y catálogo
+    expect(await sync.syncCatalog(), isA<Ok<void, Failure>>());
+    expect(api.llamadas, contains('reference'));
+
+    // Sincronización normal sin force: no debe pedir referencia porque está fresca (30 días)
+    api.llamadas.clear();
+    expect(await sync.syncCatalog(force: false), isA<Ok<void, Failure>>());
+    expect(api.llamadas, isEmpty);
+
+    // Sincronización forzada con force: true: DEBE volver a pedir la referencia
+    api.llamadas.clear();
+    expect(await sync.syncCatalog(force: true), isA<Ok<void, Failure>>());
+    expect(api.llamadas, contains('reference'));
+  });
+
+  test('PFL-16: fallo al descargar referencia registra error en sync_metadata con resource_key = reference', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final dao = PokemonDao(db);
+    final metadataDao = SyncMetadataDao(db);
+    final api = _PokeApiFalsa()..fallarEnReference = true;
+    final sync = CatalogSyncCoordinator(
+      remote: api,
+      pokemonDao: dao,
+      syncMetadataDao: metadataDao,
+    );
+    addTearDown(sync.dispose);
+
+    final resultado = await sync.syncCatalog();
+    expect(resultado, isA<Err<void, Failure>>());
+
+    final metaRef = await metadataDao.get(SyncResourceKeys.reference);
+    final metaCat = await metadataDao.get(SyncResourceKeys.catalog);
+
+    // El error debe estar registrado en 'reference'
+    expect(metaRef, isNotNull);
+    expect(metaRef?.status, SyncStatusDb.failed);
+    expect(metaRef?.lastError, contains('Fallo simulado en referencia'));
+
+    // El catálogo ni siquiera debió ser marcado como fallido
+    expect(metaCat, isNull);
   });
 }
