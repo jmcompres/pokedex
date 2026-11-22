@@ -7,9 +7,10 @@ import 'package:pokedex/features/pokemon/domain/entities/pokemon.dart';
 import 'package:pokedex/features/pokemon/presentation/widgets/type_chip.dart';
 
 class PokemonListTile extends StatelessWidget {
-  const PokemonListTile({super.key, required this.pokemon});
+  const PokemonListTile({super.key, required this.pokemon, this.onTap});
 
   final Pokemon pokemon;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -19,85 +20,91 @@ class PokemonListTile extends StatelessWidget {
 
     return Semantics(
       label: '$name, número $number, tipo ${types.join(' y ')}',
+      button: onTap != null,
+      onTap: onTap,
       excludeSemantics: true,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 90),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: const Color(0xFFE2E4E9)),
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0D252D3D),
-              blurRadius: 7,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.centerLeft,
-          children: [
-            const Positioned(
-              top: -38,
-              right: -36,
-              child: SizedBox.square(
-                dimension: 110,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.fromBorderSide(
-                      BorderSide(color: Color(0xFFF6F7FA), width: 18),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 90),
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFFE2E4E9)),
+            borderRadius: const BorderRadius.all(Radius.circular(18)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0D252D3D),
+                blurRadius: 7,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              const Positioned(
+                top: -38,
+                right: -36,
+                child: SizedBox.square(
+                  dimension: 110,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.fromBorderSide(
+                        BorderSide(color: Color(0xFFF6F7FA), width: 18),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 18, 10),
-              child: Row(
-                children: [
-                  _PokemonImage(url: pokemon.images.preferredUrl),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '#${number.toString().padLeft(4, '0')}',
-                          style: const TextStyle(
-                            color: Color(0xFF6D7688),
-                            fontFamily: 'monospace',
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 18, 10),
+                child: Row(
+                  children: [
+                    _PokemonImage(url: pokemon.images.preferredUrl),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '#${number.toString().padLeft(4, '0')}',
+                            style: const TextStyle(
+                              color: Color(0xFF6D7688),
+                              fontFamily: 'monospace',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            color: Color(0xFF222731),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.25,
+                          const SizedBox(height: 1),
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              color: Color(0xFF222731),
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.25,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: [
-                            for (final type in pokemon.types)
-                              TypeChip(type: type),
-                          ],
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: [
+                              for (final type in pokemon.types)
+                                TypeChip(type: type),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
