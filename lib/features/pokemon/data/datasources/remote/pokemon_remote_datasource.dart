@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/core/errors/failures.dart';
 import 'package:pokedex/core/network/graphql_service.dart';
 
+import 'pokemon_detail_dtos.dart';
 import 'pokemon_queries.dart';
 import 'pokemon_remote_dtos.dart';
 
@@ -18,6 +19,8 @@ abstract class PokemonRemoteDataSource {
   });
 
   Future<int> fetchPokemonCount();
+
+  Future<PokemonDetailDto> fetchPokemonDetail(int pokemonId);
 }
 
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
@@ -91,6 +94,30 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
       );
     }
   }
+
+  @override
+  Future<PokemonDetailDto> fetchPokemonDetail(int pokemonId) async {
+    final result = await _graphQLService.performQuery(
+      PokemonQueries.getPokemonDetail,
+      operationName: PokemonQueries.getPokemonDetailOp,
+      variables: <String, dynamic>{'id': pokemonId},
+    );
+
+    final rawList = result.data?['pokemon'];
+    if (rawList is! List<dynamic>) {
+      throw const ValidationFailure(
+        debugMessage: 'Respuesta de detalle inválida: nodo pokemon ausente',
+      );
+    }
+    if (rawList.isEmpty) {
+      throw ValidationFailure(
+        debugMessage: 'PokeAPI no tiene un Pokémon con id $pokemonId',
+      );
+    }
+
+    final raw = rawList.first as Map<String, dynamic>;
+    return Isolate.run(() => _parsePokemonDetail(raw));
+  }
 }
 
 ReferenceDataDto _parseReferenceData(Map<String, dynamic> data) {
@@ -126,6 +153,18 @@ List<PokemonDto> _parsePokemonPage(List<dynamic> rawList) {
     throw ValidationFailure(
       debugMessage: 'Error al parsear página de Pokémon: $e',
     );
+  }
+}
+
+PokemonDetailDto _parsePokemonDetail(Map<String, dynamic> raw) {
+  try {
+    final dto = PokemonDetailDto.fromJson(raw);
+    dto.validate();
+    return dto;
+  } on Failure {
+    rethrow;
+  } catch (e) {
+    throw ValidationFailure(debugMessage: 'Error al parsear el detalle: $e');
   }
 }
 
