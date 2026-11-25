@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import 'app_database.steps.dart';
 import 'tables/catalog/abilities_table.dart';
 import 'tables/catalog/egg_groups_table.dart';
 import 'tables/catalog/evolutions_table.dart';
@@ -22,6 +23,7 @@ import 'tables/user/achievements_table.dart';
 import 'tables/user/favorites_table.dart';
 import 'tables/user/trivia_answers_table.dart';
 import 'tables/user/trivia_results_table.dart';
+import 'tables/user/user_setting_table.dart';
 
 part 'app_database.g.dart';
 
@@ -48,6 +50,7 @@ part 'app_database.g.dart';
     TriviaResultsTable,
     TriviaAnswersTable,
     AchievementsTable,
+    UserSettingTable,
 
     SyncMetadataTable,
   ],
@@ -57,14 +60,20 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: 'pokedex'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
-    onUpgrade: (m, from, to) async {},
+    onUpgrade: _upgrade,
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
 }
+
+final _upgrade = stepByStep(
+  from1To2: (m, schema) async {
+    await m.createTable(schema.userSetting);
+  },
+);

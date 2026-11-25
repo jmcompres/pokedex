@@ -305,10 +305,10 @@ reconectar), todas reciben el mismo `Future` y solo se ejecuta una.
 ## 10. Persistencia local
 
 - **Motor:** SQLite a través de Drift, en el archivo `pokedex.sqlite` del almacenamiento
-  privado de la app. Las fechas se guardan como texto ISO-8601 (`build.yml`).
+  privado de la app. Las fechas se guardan como enteros (segundos desde 1970), el formato por defecto de Drift.
 - **Integridad:** claves foráneas activadas (`PRAGMA foreign_keys = ON`) cada vez que se abre
   la base.
-- **21 tablas** en tres grupos: catálogo, usuario y sincronización. Algunas tablas (habilidades,
+- **22 tablas** en tres grupos: catálogo, usuario y sincronización. Algunas tablas (habilidades,
   movimientos, evoluciones) ya están creadas pero se llenan en la entrega final.
 - **Índices** en las columnas que se usarán para buscar y filtrar: nombre, especie, generación,
   tipo, suma de estadísticas y cadena evolutiva.
@@ -359,6 +359,10 @@ erDiagram
         int pokemon_id PK
         datetime created_at
     }
+    user_setting {
+        text key PK
+        text value
+    }
     sync_metadata {
         text resource_key PK
         text status
@@ -379,6 +383,34 @@ erDiagram
 - `EVOLUTION` relaciona especies, no Pokémon, como indica la nota del diagrama.
 - `cursor_or_offset` se llama `next_offset`, porque la estrategia elegida es *offset*.
 - Las debilidades no se guardan: se calculan a partir de `type_efficacy`.
+
+### Migraciones del esquema (PS-10)
+
+La versión del esquema está en `schemaVersion` de `lib/core/database/app_database.dart`. Cuando
+la app abre una base con una versión menor, Drift ejecuta `onUpgrade` y la actualiza sin borrar
+los datos.
+
+| Versión | Cambio |
+| --- | --- |
+| 1 | Esquema del avance: 21 tablas de catálogo, usuario y sincronización |
+| 2 | Tabla `user_setting` (preferencias del usuario: clave → valor) |
+
+**Cómo se hace un cambio de esquema:**
+
+1. Modificar las tablas y subir `schemaVersion`.
+2. Ejecutar `dart run drift_dev make-migrations`. Guarda la foto de la nueva versión en
+   `drift_schemas/` y regenera `app_database.steps.dart` y las pruebas de `test/drift/`.
+3. Escribir el paso nuevo (`fromNToN+1`) dentro de `stepByStep`. Cada paso usa la foto de su
+   versión, no las tablas actuales, así que los pasos viejos no se modifican nunca.
+4. Ejecutar `flutter test test/drift`.
+
+**Pruebas:** `test/drift/pokedex/migration_test.dart` crea una base de cada versión anterior, la
+migra y comprueba que el resultado es igual al esquema nuevo. Otra prueba llena una base v1 con
+un Pokémon y un favorito y verifica que siguen ahí después de migrar. Se ejecutan en CI con
+`flutter test`.
+
+**Datos del usuario (PS-11):** las tablas de `tables/user/` (favoritos, trivia, logros y
+preferencias) solo las escriben sus repositorios. La sincronización del catálogo nunca las toca.
 
 ## 11. Gestión de conectividad
 
