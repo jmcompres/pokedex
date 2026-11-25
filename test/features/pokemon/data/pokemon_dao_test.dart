@@ -448,14 +448,18 @@ void main() {
   });
 
   group('esquema', () {
-    test('tiene las 21 tablas y los índices documentados', () async {
-      final tablas = await db
-          .customSelect(
-            'SELECT name FROM sqlite_master '
-            "WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
-          )
-          .get();
-      expect(tablas, hasLength(21));
+    test('tiene las 22 tablas y los índices documentados', () async {
+      final tablas =
+          (await db
+                  .customSelect(
+                    'SELECT name FROM sqlite_master '
+                    "WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
+                  )
+                  .get())
+              .map((r) => r.read<String>('name'))
+              .toSet();
+      expect(tablas, hasLength(22));
+      expect(tablas, contains('user_setting'));
 
       final indices =
           (await db
