@@ -58,8 +58,9 @@ void main() {
 
     final db2 = AppDatabase(NativeDatabase(file));
     addTearDown(db2.close);
-    final theme =
-    await SettingsRepositoryImpl(UserSettingDao(db2)).watch(Preferences.theme).first;
+    final theme = await SettingsRepositoryImpl(UserSettingDao(db2))
+        .watch(Preferences.theme)
+        .first;
 
     expect(theme, AppThemeMode.dark);
   });
