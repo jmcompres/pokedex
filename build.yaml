@@ -3,6 +3,5 @@ targets:
     builders:
       drift_dev:
         options:
-          store_date_time_values_as_text: true
           databases:
             pokedex: lib/core/database/app_database.dart
