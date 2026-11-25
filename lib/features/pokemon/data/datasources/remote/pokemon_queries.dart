@@ -4,6 +4,7 @@ abstract class PokemonQueries {
   static const String getReferenceDataOp = 'GetReferenceData';
   static const String getPokemonPageOp = 'GetPokemonPage';
   static const String getPokemonCountOp = 'GetPokemonCount';
+  static const String getPokemonDetailOp = 'GetPokemonDetail';
 
   static const String getReferenceData = r''' 
     query GetReferenceData {
@@ -87,6 +88,65 @@ abstract class PokemonQueries {
       pokemon_aggregate {
         aggregate {
           count
+        }
+      }
+    }
+  ''';
+
+  static const String getPokemonDetail = r'''
+    query GetPokemonDetail($id: Int!) {
+      pokemon(where: {id: {_eq: $id}}) {
+        id
+        pokemonabilities(order_by: {slot: asc}) {
+          slot
+          is_hidden
+          ability {
+            id
+            name
+            abilitynames(where: {language_id: {_eq: 7}}) { name }
+            abilityeffecttexts(where: {language_id: {_eq: 9}}) { short_effect }
+            abilityflavortexts(
+              where: {language_id: {_eq: 7}}
+              order_by: {version_group_id: desc}
+              limit: 1
+            ) { flavor_text }
+          }
+        }
+        pokemonmoves {
+          version_group_id
+          level
+          movelearnmethod { name }
+          move {
+            id
+            name
+            type_id
+            power
+            accuracy
+            pp
+            movedamageclass { name }
+            movenames(where: {language_id: {_eq: 7}}) { name }
+          }
+        }
+        pokemonspecy {
+          id
+          pokemonegggroups { egg_group_id }
+          evolutionchain {
+            pokemonspecies(order_by: {id: asc}) {
+              id
+              name
+              generation_id
+              evolution_chain_id
+              evolves_from_species_id
+              pokemonevolutions {
+                id
+                min_level
+                min_happiness
+                time_of_day
+                evolutiontrigger { name }
+                item { name }
+              }
+            }
+          }
         }
       }
     }
