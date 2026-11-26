@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pokedex/core/database/database_providers.dart';
+import 'package:pokedex/core/network/network_providers.dart';
 import 'package:pokedex/core/sync/domain/last_sync.dart';
 import 'package:pokedex/core/sync/domain/sync_status.dart';
 import 'package:pokedex/core/sync/sync_providers.dart';
@@ -19,6 +20,10 @@ final catalogSyncCoordinatorProvider = Provider<CatalogSyncCoordinator>((ref) {
     remote: ref.watch(pokemonRemoteDataSourceProvider),
     pokemonDao: ref.watch(pokemonDaoProvider),
     syncMetadataDao: ref.watch(syncMetadataDaoProvider),
+    retryPolicy: ref.watch(retryPolicyProvider),
+    isConnectedStream: ref
+        .watch(networkConnectivitySourceProvider)
+        .onConnectivityChanged,
   );
   ref.onDispose(coordinator.dispose);
   return coordinator;
