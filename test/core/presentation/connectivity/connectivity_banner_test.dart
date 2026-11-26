@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:pokedex/core/errors/failures.dart';
 import 'package:pokedex/core/network/network_providers.dart';
 import 'package:pokedex/core/network/service_availability.dart';
 import 'package:pokedex/core/presentation/connectivity/connectivity_banner.dart';
@@ -154,6 +155,29 @@ void main() {
         expect(find.text('Servicio no disponible'), findsOneWidget);
         expect(
           find.text('Internet disponible · API sin respuesta'),
+          findsOneWidget,
+        );
+        expect(find.byIcon(Icons.cloud_off_outlined), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'muestra Servicio no disponible y cuenta regresiva reintento N s durante SyncWaitingRetry (PFL-18)',
+      (tester) async {
+        await tester.pumpWidget(
+          buildTestWidget(
+            availability: ServiceAvailability.online,
+            syncStatus: const SyncWaitingRetry(
+              retryIn: Duration(seconds: 4),
+              failure: TimeoutFailure(),
+            ),
+            lastSync: null,
+          ),
+        );
+
+        expect(find.text('Servicio no disponible'), findsOneWidget);
+        expect(
+          find.text('Internet disponible · API sin respuesta · reintento 4 s'),
           findsOneWidget,
         );
         expect(find.byIcon(Icons.cloud_off_outlined), findsOneWidget);

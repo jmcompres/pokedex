@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:drift/native.dart';
@@ -19,10 +20,17 @@ class _PokeApiFalsa implements PokemonRemoteDataSource {
   final llamadas = <String>[];
   int? fallarEnOffset;
   bool fallarEnReference = false;
+  int countCalls = 0;
+  final fallosProgramadosEnReference = <Failure>[];
+  final fallosProgramadosEnCount = <Failure>[];
+  final fallosProgramadosEnPage = <int, List<Failure>>{};
 
   @override
   Future<ReferenceDataDto> fetchReferenceData() async {
     llamadas.add('reference');
+    if (fallosProgramadosEnReference.isNotEmpty) {
+      throw fallosProgramadosEnReference.removeAt(0);
+    }
     if (fallarEnReference) {
       throw const NetworkFailure(debugMessage: 'Fallo simulado en referencia');
     }
@@ -36,7 +44,13 @@ class _PokeApiFalsa implements PokemonRemoteDataSource {
   }
 
   @override
-  Future<int> fetchPokemonCount() async => 120;
+  Future<int> fetchPokemonCount() async {
+    countCalls++;
+    if (fallosProgramadosEnCount.isNotEmpty) {
+      throw fallosProgramadosEnCount.removeAt(0);
+    }
+    return 120;
+  }
 
   @override
   Future<List<PokemonDto>> fetchPokemonPage({
@@ -44,6 +58,10 @@ class _PokeApiFalsa implements PokemonRemoteDataSource {
     required int offset,
   }) async {
     llamadas.add('page:$offset');
+    final cola = fallosProgramadosEnPage[offset];
+    if (cola != null && cola.isNotEmpty) {
+      throw cola.removeAt(0);
+    }
     if (offset == fallarEnOffset) {
       fallarEnOffset = null;
       throw const NetworkFailure();
@@ -222,5 +240,281 @@ void main() {
 
     // El catálogo ni siquiera debió ser marcado como fallido
     expect(metaCat, isNull);
+  });
+
+  group('PFL-18: reintentos con backoff y manejo de errores', () {
+    test('reintenta tras fallos reintentables, emite SyncWaitingRetry y completa reanudando desde offset', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final dao = PokemonDao(db);
+      final metadataDao = SyncMetadataDao(db);
+      final api = _PokeApiFalsa()
+        ..fallosProgramadosEnPage[50] = [
+          const TimeoutFailure(debugMessage: 'timeout 1'),
+          const ServerFailure(statusCode: 503, debugMessage: '503'),
+        ];
+      final esperas = <Duration>[];
+      final sync = CatalogSyncCoordinator(
+        remote: api,
+        pokemonDao: dao,
+        syncMetadataDao: metadataDao,
+        retryPolicy: const RetryPolicy(jitterRatio: 0),
+        delayFn: (delay) async => esperas.add(delay),
+      );
+      addTearDown(sync.dispose);
+
+      final estados = <SyncStatus>[];
+      final sub = sync.watchStatus().listen(estados.add);
+      addTearDown(sub.cancel);
+
+      final resultado = await sync.syncCatalog();
+      await Future<void>.delayed(Duration.zero);
+      expect(resultado, isA<Ok<void, Failure>>());
+
+      expect(esperas, [const Duration(seconds: 2), const Duration(seconds: 4)]);
+      expect(api.llamadas, [
+        'reference',
+        'page:0',
+        'page:50',
+        'page:50',
+        'page:50',
+        'page:100',
+      ]);
+      expect(
+        estados,
+        containsAllInOrder([
+          const SyncWaitingRetry(
+            retryIn: Duration(seconds: 2),
+            failure: TimeoutFailure(debugMessage: 'timeout 1'),
+          ),
+          const SyncWaitingRetry(
+            retryIn: Duration(seconds: 4),
+            failure: ServerFailure(statusCode: 503, debugMessage: '503'),
+          ),
+          const SyncCompleted(),
+        ]),
+      );
+
+      final meta = await metadataDao.get(SyncResourceKeys.catalog);
+      expect(meta?.status, SyncStatusDb.completed);
+      expect(meta?.lastError, isNull);
+      expect((await dao.countByTable())['pokemon'], 120);
+    });
+
+    test('se detiene al agotar maxAttempts, emite SyncFailed y guarda error en sync_metadata', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final dao = PokemonDao(db);
+      final metadataDao = SyncMetadataDao(db);
+      final api = _PokeApiFalsa()
+        ..fallosProgramadosEnCount.addAll(
+          List.filled(5, const NetworkFailure(debugMessage: 'API caída')),
+        );
+      final esperas = <Duration>[];
+      final sync = CatalogSyncCoordinator(
+        remote: api,
+        pokemonDao: dao,
+        syncMetadataDao: metadataDao,
+        retryPolicy: const RetryPolicy(jitterRatio: 0, maxAttempts: 5),
+        delayFn: (delay) async => esperas.add(delay),
+      );
+      addTearDown(sync.dispose);
+
+      final estados = <SyncStatus>[];
+      final sub = sync.watchStatus().listen(estados.add);
+      addTearDown(sub.cancel);
+
+      final resultado = await sync.syncCatalog();
+      await Future<void>.delayed(Duration.zero);
+      expect(resultado, isA<Err<void, Failure>>());
+      expect(api.countCalls, 5);
+      expect(esperas, const [
+        Duration(seconds: 2),
+        Duration(seconds: 4),
+        Duration(seconds: 8),
+        Duration(seconds: 16),
+      ]);
+      expect(
+        estados.last,
+        const SyncFailed(NetworkFailure(debugMessage: 'API caída')),
+      );
+
+      final meta = await metadataDao.get(SyncResourceKeys.catalog);
+      expect(meta?.status, SyncStatusDb.failed);
+      expect(meta?.lastError, 'API caída');
+    });
+
+    test('no reintenta ValidationFailure ni GraphQLFailure', () async {
+      for (final failure in const <Failure>[
+        ValidationFailure(debugMessage: 'datos inválidos'),
+        GraphQLFailure(debugMessage: 'query inválida'),
+      ]) {
+        final db = AppDatabase(NativeDatabase.memory());
+        final api = _PokeApiFalsa()..fallosProgramadosEnCount.add(failure);
+        final esperas = <Duration>[];
+        final sync = CatalogSyncCoordinator(
+          remote: api,
+          pokemonDao: PokemonDao(db),
+          syncMetadataDao: SyncMetadataDao(db),
+          retryPolicy: const RetryPolicy(jitterRatio: 0),
+          delayFn: (delay) async => esperas.add(delay),
+        );
+
+        final estados = <SyncStatus>[];
+        final sub = sync.watchStatus().listen(estados.add);
+        try {
+          expect(await sync.syncCatalog(), isA<Err<void, Failure>>());
+          await Future<void>.delayed(Duration.zero);
+          expect(api.countCalls, 1);
+          expect(esperas, isEmpty);
+          expect(estados.whereType<SyncWaitingRetry>(), isEmpty);
+          expect(estados.last, SyncFailed(failure));
+        } finally {
+          await sub.cancel();
+          await sync.dispose();
+          await db.close();
+        }
+      }
+    });
+
+    test('ante RateLimitFailure espera al menos su retryAfter', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final api = _PokeApiFalsa()
+        ..fallosProgramadosEnCount.add(
+          const RateLimitFailure(retryAfter: Duration(seconds: 15)),
+        );
+      final esperas = <Duration>[];
+      final sync = CatalogSyncCoordinator(
+        remote: api,
+        pokemonDao: PokemonDao(db),
+        syncMetadataDao: SyncMetadataDao(db),
+        retryPolicy: const RetryPolicy(jitterRatio: 0),
+        delayFn: (delay) async => esperas.add(delay),
+      );
+      addTearDown(sync.dispose);
+
+      final resultado = await sync.syncCatalog();
+      await Future<void>.delayed(Duration.zero);
+      expect(resultado, isA<Ok<void, Failure>>());
+      expect(esperas, [const Duration(seconds: 15)]);
+    });
+
+    test('si se pierde la red durante SyncWaitingRetry cancela la espera y reinicia al reconectar', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final connectivity = StreamController<bool>.broadcast();
+      addTearDown(connectivity.close);
+
+      final api = _PokeApiFalsa()
+        ..fallosProgramadosEnCount.addAll(const [
+          TimeoutFailure(debugMessage: 'fallo 1'),
+          TimeoutFailure(debugMessage: 'fallo tras reconectar'),
+        ]);
+
+      final esperaIniciada = Completer<void>();
+      final esperas = <Duration>[];
+      var esPrimeraEspera = true;
+
+      final sync = CatalogSyncCoordinator(
+        remote: api,
+        pokemonDao: PokemonDao(db),
+        syncMetadataDao: SyncMetadataDao(db),
+        retryPolicy: const RetryPolicy(jitterRatio: 0),
+        isConnectedStream: connectivity.stream,
+        delayFn: (delay) async {
+          esperas.add(delay);
+          if (esPrimeraEspera) {
+            esPrimeraEspera = false;
+            esperaIniciada.complete();
+            await Completer<void>().future;
+          }
+        },
+      );
+      addTearDown(sync.dispose);
+
+      final primeraSync = sync.syncCatalog();
+      await esperaIniciada.future;
+
+      // Se pierde la red mientras espera: cancela sin hacer un segundo intento offline
+      connectivity.add(false);
+      expect(await primeraSync, isA<Err<void, Failure>>());
+      expect(api.countCalls, 1);
+
+      // Al reconectar, reinicia desde el intento 1 (espera 2 s, no 4 s)
+      connectivity.add(true);
+      await Future<void>.delayed(Duration.zero);
+      expect(await sync.syncCatalog(), isA<Ok<void, Failure>>());
+      expect(esperas, const [Duration(seconds: 2), Duration(seconds: 2)]);
+    });
+
+    test('refresco manual (force: true) durante una espera la cancela y reinicia contador', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final api = _PokeApiFalsa()
+        ..fallosProgramadosEnCount.addAll(const [
+          TimeoutFailure(debugMessage: 'fallo inicial'),
+          TimeoutFailure(debugMessage: 'fallo tras force'),
+        ]);
+
+      final esperaIniciada = Completer<void>();
+      final esperas = <Duration>[];
+      var esPrimeraEspera = true;
+
+      final sync = CatalogSyncCoordinator(
+        remote: api,
+        pokemonDao: PokemonDao(db),
+        syncMetadataDao: SyncMetadataDao(db),
+        retryPolicy: const RetryPolicy(jitterRatio: 0),
+        delayFn: (delay) async {
+          esperas.add(delay);
+          if (esPrimeraEspera) {
+            esPrimeraEspera = false;
+            esperaIniciada.complete();
+            await Completer<void>().future;
+          }
+        },
+      );
+      addTearDown(sync.dispose);
+
+      final syncEnCurso = sync.syncCatalog();
+      await esperaIniciada.future;
+
+      final syncForzada = sync.syncCatalog(force: true);
+      expect(await syncEnCurso, isA<Ok<void, Failure>>());
+      expect(await syncForzada, isA<Ok<void, Failure>>());
+      expect(esperas, const [Duration(seconds: 2), Duration(seconds: 2)]);
+    });
+
+    test('OF-04: una GraphQLFailure en sincronización posterior conserva intactos los datos locales', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final dao = PokemonDao(db);
+      final metadataDao = SyncMetadataDao(db);
+      final api = _PokeApiFalsa();
+      final sync = CatalogSyncCoordinator(
+        remote: api,
+        pokemonDao: dao,
+        syncMetadataDao: metadataDao,
+        retryPolicy: const RetryPolicy(jitterRatio: 0),
+        delayFn: (_) async {},
+      );
+      addTearDown(sync.dispose);
+
+      expect(await sync.syncCatalog(), isA<Ok<void, Failure>>());
+      expect((await dao.countByTable())['pokemon'], 120);
+
+      api.fallosProgramadosEnPage[0] = [
+        const GraphQLFailure(debugMessage: 'Respuesta parcial con errors'),
+      ];
+
+      final fallo = await sync.syncCatalog(force: true);
+      expect(fallo, isA<Err<void, Failure>>());
+      expect((await dao.countByTable())['pokemon'], 120);
+
+      final meta = await metadataDao.get(SyncResourceKeys.catalog);
+      expect(meta?.status, SyncStatusDb.failed);
+      expect(meta?.lastError, contains('Respuesta parcial con errors'));
+    });
   });
 }
