@@ -6,6 +6,7 @@ import 'package:pokedex/core/database/app_database.dart';
 import 'package:pokedex/core/database/tables/sync/sync_metadata_table.dart';
 import 'package:pokedex/core/errors/failures.dart';
 import 'package:pokedex/core/sync/domain/sync_status.dart';
+import 'package:pokedex/core/sync/retry_policy.dart';
 import 'package:pokedex/core/sync/sync_metadata_dao.dart';
 import 'package:pokedex/core/sync/sync_resource_keys.dart';
 import 'package:pokedex/core/utils/result.dart';
@@ -84,6 +85,7 @@ void main() {
       remote: api,
       pokemonDao: dao,
       syncMetadataDao: SyncMetadataDao(db),
+      retryPolicy: const RetryPolicy(maxAttempts: 1),
     );
     addTearDown(sync.dispose);
     Future<int> guardados() async => (await dao.countByTable())['pokemon']!;
@@ -203,6 +205,7 @@ void main() {
       remote: api,
       pokemonDao: dao,
       syncMetadataDao: metadataDao,
+      retryPolicy: const RetryPolicy(maxAttempts: 1),
     );
     addTearDown(sync.dispose);
 
