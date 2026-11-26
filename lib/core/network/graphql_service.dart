@@ -65,38 +65,52 @@ class GraphQLService {
   }
 
   Failure _mapGraphQLException(OperationException ex) {
-    if (ex.linkException != null) {
-      final linkException = ex.linkException!;
+    final linkException = ex.linkException;
 
-      if (linkException is NetworkException) {
-        return const NetworkFailure(
-          debugMessage: 'Error de red en el Link de GraphQL',
+    if (linkException is NetworkException) {
+      return const NetworkFailure(
+        debugMessage: 'Error de red en el Link de GraphQL',
+      );
+    }
+
+    final graphqlErrors = ex.graphqlErrors.isNotEmpty
+        ? ex.graphqlErrors
+        : (linkException is ServerException
+              ? (linkException.parsedResponse?.errors ?? const <GraphQLError>[])
+              : const <GraphQLError>[]);
+
+    final httpResponse = switch (linkException) {
+      HttpLinkServerException(:final response) => response,
+      HttpLinkParserException(:final response) => response,
+      _ => null,
+    };
+
+    if (httpResponse != null) {
+      final statusCode = httpResponse.statusCode;
+      if (statusCode == 429) {
+        final retryAfterSeconds = int.tryParse(
+          httpResponse.headers['retry-after'] ?? '',
+        );
+
+        return RateLimitFailure(
+          debugMessage: 'Límite de peticiones excedido (429)',
+          retryAfter: retryAfterSeconds != null
+              ? Duration(seconds: retryAfterSeconds)
+              : null,
         );
       }
 
-      if (linkException is HttpLinkServerException) {
-        if (linkException.response.statusCode == 429) {
-          final retryAfterSeconds = int.tryParse(
-            linkException.response.headers['retry-after'] ?? '',
-          );
-
-          return RateLimitFailure(
-            debugMessage: 'Límite de peticiones excedido (429)',
-            retryAfter: retryAfterSeconds != null
-                ? Duration(seconds: retryAfterSeconds)
-                : null,
-          );
-        }
+      if (statusCode >= 500 || graphqlErrors.isEmpty) {
         return ServerFailure(
           debugMessage: 'Error de servidor',
-          statusCode: linkException.response.statusCode,
+          statusCode: statusCode >= 300 ? statusCode : null,
         );
       }
     }
 
-    if (ex.graphqlErrors.isNotEmpty) {
+    if (graphqlErrors.isNotEmpty) {
       return GraphQLFailure(
-        debugMessage: ex.graphqlErrors.map((e) => e.message).join(' | '),
+        debugMessage: graphqlErrors.map((e) => e.message).join(' | '),
       );
     }
 
