@@ -17,6 +17,9 @@ class FakeGraphQLService implements GraphQLService {
   Map<String, dynamic>? lastVariables;
 
   @override
+  bool Function()? get isOutageSimulated => null;
+
+  @override
   Future<QueryResult<Object?>> performQuery(
     String query, {
     required String operationName,
