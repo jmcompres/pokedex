@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:drift/drift.dart';
 import 'package:pokedex/core/database/app_database.dart';
 import 'package:pokedex/features/pokemon/data/datasources/local/catalog_local_models.dart';
@@ -98,5 +100,10 @@ extension PokemonDetailDtoMapper on PokemonDetailDto {
           ),
       ],
     );
+  }
+
+  Future<PokemonDetailWrite> toDetailWriteAsync() {
+    final dto = this;
+    return Isolate.run(dto.toDetailWrite);
   }
 }
