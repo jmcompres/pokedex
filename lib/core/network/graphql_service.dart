@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql/client.dart';
 
 import '../errors/failures.dart';
+import 'api_outage_simulator.dart';
 
 final graphqlClientProvider = Provider<GraphQLClient>((ref) {
   final HttpLink httpLink = HttpLink('https://graphql.pokeapi.co/v1beta2');
@@ -22,8 +23,9 @@ final graphqlClientProvider = Provider<GraphQLClient>((ref) {
 class GraphQLService {
   final GraphQLClient _client;
   static const _timeout = Duration(seconds: 15);
+  final bool Function()? isOutageSimulated;
 
-  GraphQLService(this._client);
+  GraphQLService(this._client, {this.isOutageSimulated});
 
   Future<QueryResult> performQuery(
     String query, {
@@ -40,6 +42,13 @@ class GraphQLService {
     final stopwatch = Stopwatch()..start();
 
     try {
+      if (kDebugMode && (isOutageSimulated?.call() ?? false)) {
+        throw const ServerFailure(
+          debugMessage: 'Simulación de API no disponible',
+          statusCode: 503,
+        );
+      }
+
       final QueryResult result = await _client.query(options).timeout(timeout);
       if (result.hasException) {
         throw _mapGraphQLException(result.exception!);
@@ -119,5 +128,8 @@ class GraphQLService {
 }
 
 final graphqlServiceProvider = Provider<GraphQLService>((ref) {
-  return GraphQLService(ref.read(graphqlClientProvider));
+  return GraphQLService(
+    ref.read(graphqlClientProvider),
+    isOutageSimulated: () => kDebugMode && ref.read(simulateApiOutageProvider),
+  );
 });

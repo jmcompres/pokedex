@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'api_outage_simulator.dart';
 import 'connectivity_plus_source.dart';
 import 'graphql_health_check.dart';
 import 'graphql_service.dart';
@@ -16,7 +18,10 @@ final networkConnectivitySourceProvider = Provider<NetworkConnectivitySource>((
 });
 
 final graphQLHealthCheckProvider = Provider<GraphQLHealthCheck>((ref) {
-  return PokeApiGraphQLHealthCheck(ref.watch(graphqlServiceProvider));
+  return PokeApiGraphQLHealthCheck(
+    ref.watch(graphqlServiceProvider),
+    isOutageSimulated: () => kDebugMode && ref.read(simulateApiOutageProvider),
+  );
 });
 
 final onServiceReconnectedProvider = Provider<OnServiceReconnected?>((ref) {

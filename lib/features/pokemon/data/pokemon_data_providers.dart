@@ -24,6 +24,7 @@ final catalogSyncCoordinatorProvider = Provider<CatalogSyncCoordinator>((ref) {
     isConnectedStream: ref
         .watch(networkConnectivitySourceProvider)
         .onConnectivityChanged,
+    onSyncFailed: () => ref.read(serviceAvailabilityMonitorProvider).recheck(),
   );
   ref.onDispose(coordinator.dispose);
   return coordinator;

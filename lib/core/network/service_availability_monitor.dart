@@ -11,12 +11,14 @@ class ServiceAvailabilityMonitor {
     required this.healthCheck,
     this.offlineDebounceDuration = const Duration(milliseconds: 1500),
     this.onReconnected,
+    this.periodicCheckInterval = const Duration(seconds: 30),
   });
 
   final NetworkConnectivitySource connectivitySource;
   final GraphQLHealthCheck healthCheck;
   final Duration offlineDebounceDuration;
   final OnServiceReconnected? onReconnected;
+  final Duration? periodicCheckInterval;
 
   final StreamController<ServiceAvailability> _controller =
       StreamController<ServiceAvailability>.broadcast();
@@ -29,6 +31,7 @@ class ServiceAvailabilityMonitor {
   bool _isDisposed = false;
   bool _wasOffline = false;
   int _checkGeneration = 0;
+  Timer? _periodicCheckTimer;
 
   ServiceAvailability get currentStatus => _currentStatus;
 
@@ -56,6 +59,8 @@ class ServiceAvailabilityMonitor {
     } else {
       await _verifyEndpointHealth();
     }
+
+    _startPeriodicCheck();
   }
 
   Future<ServiceAvailability> recheck() async {
@@ -148,7 +153,8 @@ class ServiceAvailabilityMonitor {
   void _emitStatus(ServiceAvailability newStatus) {
     if (_isDisposed || _currentStatus == newStatus) return;
 
-    if (newStatus == ServiceAvailability.offline) {
+    if (newStatus == ServiceAvailability.offline ||
+        newStatus == ServiceAvailability.serviceUnavailable) {
       _wasOffline = true;
     }
 
@@ -185,7 +191,30 @@ class ServiceAvailabilityMonitor {
     _isDisposed = true;
     _checkGeneration++;
     _cancelOfflineDebounce();
+    _periodicCheckTimer?.cancel();
+    _periodicCheckTimer = null;
     await _connectivitySubscription?.cancel();
     await _controller.close();
+  }
+
+  void _startPeriodicCheck() {
+    _periodicCheckTimer?.cancel();
+    if (periodicCheckInterval == null || _isDisposed) return;
+
+    _periodicCheckTimer = Timer.periodic(
+      periodicCheckInterval!,
+      (_) => _onPeriodicTick(),
+    );
+  }
+
+  void _onPeriodicTick() {
+    if (_isDisposed) return;
+
+    if (_currentStatus == ServiceAvailability.offline ||
+        _currentStatus == ServiceAvailability.verifying) {
+      return;
+    }
+
+    unawaited(recheck());
   }
 }

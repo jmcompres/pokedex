@@ -156,6 +156,29 @@ void main() {
         throwsA(isA<TimeoutFailure>()),
       );
     });
+
+    test('lanza ServerFailure 503 sin consultar el link cuando isOutageSimulated retorna true (PA-08)', () async {
+      var linkCalled = false;
+      final link = Link.function((request, [forward]) {
+        linkCalled = true;
+        return Stream.value(
+          const Response(
+            response: <String, dynamic>{},
+            data: <String, dynamic>{},
+          ),
+        );
+      });
+      final client = GraphQLClient(cache: GraphQLCache(), link: link);
+      final service = GraphQLService(client, isOutageSimulated: () => true);
+
+      await expectLater(
+        service.performQuery(_sampleQuery, operationName: 'TestQuery'),
+        throwsA(
+          isA<ServerFailure>().having((f) => f.statusCode, 'statusCode', 503),
+        ),
+      );
+      expect(linkCalled, isFalse);
+    });
   });
 
   group('GraphQLService con HttpLink real (RNF-RES-05, OF-04)', () {
