@@ -517,4 +517,67 @@ void main() {
       expect(meta?.lastError, contains('Respuesta parcial con errors'));
     });
   });
+
+  group('PFL-19: notificación onSyncFailed', () {
+    test(
+      'invoca onSyncFailed cuando falla la sincronización con red activa',
+      () async {
+        final db = AppDatabase(NativeDatabase.memory());
+        addTearDown(db.close);
+        final api = _PokeApiFalsa()
+          ..fallosProgramadosEnReference.add(
+            const GraphQLFailure(debugMessage: 'API no disponible'),
+          );
+        var syncFailedCalls = 0;
+
+        final sync = CatalogSyncCoordinator(
+          remote: api,
+          pokemonDao: PokemonDao(db),
+          syncMetadataDao: SyncMetadataDao(db),
+          retryPolicy: const RetryPolicy(jitterRatio: 0),
+          delayFn: (_) async {},
+          onSyncFailed: () async {
+            syncFailedCalls++;
+          },
+        );
+        addTearDown(sync.dispose);
+
+        final result = await sync.syncCatalog();
+        expect(result, isA<Err<void, Failure>>());
+        expect(syncFailedCalls, 1);
+      },
+    );
+
+    test('no invoca onSyncFailed cuando la red está offline', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final api = _PokeApiFalsa()
+        ..fallosProgramadosEnReference.add(
+          const NetworkFailure(debugMessage: 'Sin conexión'),
+        );
+      final connectivityController = StreamController<bool>.broadcast();
+      addTearDown(connectivityController.close);
+      var syncFailedCalls = 0;
+
+      final sync = CatalogSyncCoordinator(
+        remote: api,
+        pokemonDao: PokemonDao(db),
+        syncMetadataDao: SyncMetadataDao(db),
+        retryPolicy: const RetryPolicy(jitterRatio: 0),
+        isConnectedStream: connectivityController.stream,
+        delayFn: (_) async {},
+        onSyncFailed: () async {
+          syncFailedCalls++;
+        },
+      );
+      addTearDown(sync.dispose);
+
+      connectivityController.add(false);
+      await Future<void>.delayed(Duration.zero);
+
+      final result = await sync.syncCatalog();
+      expect(result, isA<Err<void, Failure>>());
+      expect(syncFailedCalls, 0);
+    });
+  });
 }

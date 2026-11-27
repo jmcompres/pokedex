@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:graphql/client.dart';
 import 'package:pokedex/core/errors/failures.dart';
+import 'package:pokedex/core/network/api_outage_simulator.dart';
+import 'package:pokedex/core/network/graphql_service.dart';
 import 'package:pokedex/core/network/network_contracts.dart';
 import 'package:pokedex/core/network/network_providers.dart';
 import 'package:pokedex/core/network/service_availability.dart';
@@ -275,6 +278,64 @@ void main() {
       expect(monitor.currentStatus, ServiceAvailability.online);
       expect(autoSyncCalls, 1);
     });
+
+    test('la verificación periódica detecta recuperación de serviceUnavailable a online y dispara onReconnected (IND-03)', () async {
+      var autoSyncCalls = 0;
+      fakeHealthCheck.isHealthy = false;
+
+      monitor = ServiceAvailabilityMonitor(
+        connectivitySource: fakeConnectivity,
+        healthCheck: fakeHealthCheck,
+        offlineDebounceDuration: testDebounce,
+        periodicCheckInterval: const Duration(milliseconds: 40),
+        onReconnected: () async {
+          autoSyncCalls++;
+        },
+      );
+
+      await monitor.initialize();
+      expect(monitor.currentStatus, ServiceAvailability.serviceUnavailable);
+      expect(autoSyncCalls, 0);
+
+      fakeHealthCheck.isHealthy = true;
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+
+      expect(monitor.currentStatus, ServiceAvailability.online);
+      expect(autoSyncCalls, 1);
+    });
+
+    test('la verificación periódica detecta caída silenciosa de online a serviceUnavailable (IND-03)', () async {
+      monitor = ServiceAvailabilityMonitor(
+        connectivitySource: fakeConnectivity,
+        healthCheck: fakeHealthCheck,
+        offlineDebounceDuration: testDebounce,
+        periodicCheckInterval: const Duration(milliseconds: 40),
+      );
+
+      await monitor.initialize();
+      expect(monitor.currentStatus, ServiceAvailability.online);
+
+      fakeHealthCheck.isHealthy = false;
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+
+      expect(monitor.currentStatus, ServiceAvailability.serviceUnavailable);
+    });
+
+    test('la verificación periódica no ejecuta health checks mientras el monitor está offline', () async {
+      fakeConnectivity = FakeConnectivitySource(initialConnection: false);
+      monitor = ServiceAvailabilityMonitor(
+        connectivitySource: fakeConnectivity,
+        healthCheck: fakeHealthCheck,
+        offlineDebounceDuration: testDebounce,
+        periodicCheckInterval: const Duration(milliseconds: 30),
+      );
+
+      await monitor.initialize();
+      expect(monitor.currentStatus, ServiceAvailability.offline);
+
+      await Future<void>.delayed(const Duration(milliseconds: 90));
+      expect(fakeHealthCheck.callCount, 0);
+    });
   });
 
   group('Riverpod network_providers', () {
@@ -309,5 +370,59 @@ void main() {
         expect(sub.read(), ServiceAvailability.online);
       },
     );
+
+    test('simulateApiOutageProvider con recheck() cambia el estado a serviceUnavailable y lo restaura a online (PA-08)', () async {
+      final fakeConnectivity = FakeConnectivitySource(initialConnection: true);
+      final mockClient = GraphQLClient(
+        cache: GraphQLCache(),
+        link: Link.function(
+          (request, [forward]) => Stream.value(
+            const Response(
+              response: <String, dynamic>{},
+              data: <String, dynamic>{'__typename': 'query_root'},
+            ),
+          ),
+        ),
+        defaultPolicies: DefaultPolicies(
+          query: Policies(fetch: FetchPolicy.noCache),
+        ),
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          networkConnectivitySourceProvider.overrideWithValue(fakeConnectivity),
+          graphqlClientProvider.overrideWithValue(mockClient),
+        ],
+      );
+      addTearDown(() async {
+        container.dispose();
+        await fakeConnectivity.dispose();
+      });
+
+      final sub = container.listen(
+        serviceAvailabilityProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+
+      final monitor = container.read(serviceAvailabilityMonitorProvider);
+      if (monitor.currentStatus != ServiceAvailability.online) {
+        await monitor.statusStream.firstWhere(
+          (status) => status == ServiceAvailability.online,
+        );
+      }
+      await Future<void>.delayed(Duration.zero);
+      expect(sub.read(), ServiceAvailability.online);
+
+      container.read(simulateApiOutageProvider.notifier).setSimulated(true);
+      await monitor.recheck();
+      await Future<void>.delayed(Duration.zero);
+      expect(sub.read(), ServiceAvailability.serviceUnavailable);
+
+      container.read(simulateApiOutageProvider.notifier).setSimulated(false);
+      await monitor.recheck();
+      await Future<void>.delayed(Duration.zero);
+      expect(sub.read(), ServiceAvailability.online);
+    });
   });
 }
