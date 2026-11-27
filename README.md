@@ -202,6 +202,7 @@ test/                               # Misma estructura que lib/
 docs/
 ├── modelo-datos.md                 # Diagrama entidad-relación completo e índices
 ├── demo-restauracion.md            # Procedimiento para alterar y restaurar datos
+├── guia-demo.md                    # Guía de demostración (PA-08 / IND-02 / IND-03)
 └── adr/                            # Architecture Decision Records
 ```
 
@@ -424,19 +425,29 @@ responda**:
 ```mermaid
 stateDiagram-v2
     [*] --> verifying
-    verifying --> online: health check OK
+    verifying --> online: health check OK (dispara sync si venía de offline/caída)
     verifying --> serviceUnavailable: health check falla
     verifying --> offline: no hay red
     online --> offline: se pierde la red (tras 1,5 s)
+    online --> verifying: verificación periódica (30 s) o fallo de sync
     serviceUnavailable --> offline: se pierde la red (tras 1,5 s)
+    serviceUnavailable --> verifying: verificación periódica (30 s) o recheck manual
     offline --> verifying: vuelve la red
-    online --> online: dispara la sync si venía de offline
 ```
 
 - **Sin parpadeos (IND-06).** La pérdida de red espera 1,5 s antes de mostrarse. Si la red
   vuelve antes, el indicador no cambia.
-- **Reconexión (OF-11, OF-12).** Al pasar de *Offline* a *Online*, el monitor dispara la
-  sincronización.
+- **Reconexión (OF-11, OF-12).** Al pasar de *Offline* o *Servicio no disponible* a *Online*,
+  el monitor dispara la sincronización pendiente.
+- **Verificación periódica y tras fallo de sincronización (IND-03).** Con la red activa,
+  `ServiceAvailabilityMonitor` revalida la API cada **30 s** (`periodicCheckInterval`) cuando
+  está en *Online* o *Servicio no disponible*, y `CatalogSyncCoordinator` también solicita un
+  `recheck()` si una sincronización falla teniendo red (`onSyncFailed`).
+- **Simulación de API caída en modo debug (PA-08).** Cuando `kDebugMode` es `true`, la pestaña
+  **Ajustes** muestra el interruptor «Simular API caída» (`simulateApiOutageProvider`), que hace
+  fallar tanto `PokeApiGraphQLHealthCheck` como `GraphQLService` (con `ServerFailure` 503) sin
+  desconectar la red del dispositivo. En compilaciones *release* queda oculto automáticamente.
+  Ver [docs/guia-demo.md](docs/guia-demo.md).
 - **Indicador global** (`ConnectivityBanner`). Muestra un estado por vez, con icono, texto y
   etiqueta para lectores de pantalla (IND-05). Las prioridades: sin red → *Offline*; sync en
   curso → *Sincronizando* (con "X de Y"); API caída → *Servicio no disponible*; si no →
@@ -462,9 +473,6 @@ requisitos obligatorios.
 - La caché de imágenes está en el directorio de caché del sistema: si el usuario o Android
   la vacían, las imágenes se vuelven a descargar cuando hay conexión. Sin conexión, se
   muestra un icono de reemplazo.
-- La API solo se vuelve a verificar cuando cambia la red. Si PokeAPI se cae con la red
-  activa, el indicador sigue en *Online* hasta el siguiente cambio de red (la sincronización
-  sí falla y lo registra). La verificación periódica llega con el *backoff*.
 - El indicador está en la pantalla del catálogo, que por ahora es la única. Cuando haya más
   pantallas, se moverá al nivel de la aplicación para que esté en todas (IND-01).
 - Los textos están en español y escritos en el código; la internacionalización es de la
