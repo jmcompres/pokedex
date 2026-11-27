@@ -39,3 +39,27 @@ class CatalogPage {
   final List<PokemonFormsTableCompanion> forms;
   final List<PokemonFormTypesTableCompanion> formTypes;
 }
+
+class PokemonDetailWrite {
+  const PokemonDetailWrite({
+    required this.pokemonId,
+    required this.speciesId,
+    required this.abilities,
+    required this.pokemonAbilities,
+    required this.moves,
+    required this.pokemonMoves,
+    required this.chainSpecies,
+    required this.evolutions,
+    required this.speciesEggGroups,
+  });
+
+  final int pokemonId;
+  final int speciesId;
+  final List<AbilitiesTableCompanion> abilities;
+  final List<PokemonAbilitiesTableCompanion> pokemonAbilities;
+  final List<MovesTableCompanion> moves;
+  final List<PokemonMovesTableCompanion> pokemonMoves;
+  final List<SpeciesTableCompanion> chainSpecies;
+  final List<EvolutionsTableCompanion> evolutions;
+  final List<SpeciesEggGroupsTableCompanion> speciesEggGroups;
+}
