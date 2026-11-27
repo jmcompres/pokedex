@@ -29,6 +29,7 @@ class CatalogSyncCoordinator {
     Stream<bool>? isConnectedStream,
     this.tickInterval = const Duration(seconds: 1),
     this.delayFn,
+    this.onSyncFailed,
   }) {
     if (isConnectedStream != null) {
       _connectivitySub = isConnectedStream.listen(
@@ -44,6 +45,7 @@ class CatalogSyncCoordinator {
   final RetryPolicy retryPolicy;
   final Duration tickInterval;
   final Future<void> Function(Duration)? delayFn;
+  final Future<void> Function()? onSyncFailed;
 
   static const _catalogMaxAge = Duration(hours: 24);
   static const _referenceMaxAge = Duration(days: 30);
@@ -192,6 +194,10 @@ class CatalogSyncCoordinator {
     required int attempt,
   }) async {
     await _recordFailureMetadata(failure, resourceKey: resourceKey);
+
+    if (!_disposed && !_isOffline && onSyncFailed != null) {
+      unawaited(onSyncFailed!());
+    }
 
     if (_disposed || _isOffline || !retryPolicy.canRetry(failure, attempt)) {
       if (!_disposed) {
