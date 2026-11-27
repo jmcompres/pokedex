@@ -13,6 +13,7 @@ import 'package:pokedex/core/database/tables/catalog/species_table.dart';
 import 'package:pokedex/core/database/tables/catalog/types_table.dart';
 import 'package:pokedex/core/database/tables/catalog/version_groups_table.dart';
 import 'package:pokedex/core/database/tables/sync/sync_metadata_table.dart';
+import 'package:pokedex/core/sync/sync_resource_keys.dart';
 
 import 'catalog_local_models.dart';
 
@@ -78,6 +79,150 @@ class PokemonDetailDao extends DatabaseAccessor<AppDatabase>
       b.insertAll(evolutionsTable, detail.evolutions);
 
       b.insertAllOnConflictUpdate(syncMetadataTable, [progress]);
+    });
+  }
+
+  //esto es solo para que se active el loadDetail cada vez que se registre un cabmio en alguna de las tablas de detalle
+  Stream<PokemonDetailLocal?> watchDetail(int pokemonId) {
+    final cambios = customSelect(
+      'SELECT 1',
+      readsFrom: {
+        pokemonTable,
+        speciesTable,
+        pokemonTypesTable,
+        typesTable,
+        abilitiesTable,
+        pokemonAbilitiesTable,
+        movesTable,
+        pokemonMovesTable,
+        evolutionsTable,
+        eggGroupsTable,
+        speciesEggGroupsTable,
+        versionGroupsTable,
+        syncMetadataTable,
+      },
+    );
+    return cambios.watch().asyncMap((_) => loadDetail(pokemonId));
+  }
+
+  Future<PokemonDetailLocal?> loadDetail(int pokemonId) {
+    return transaction(() async {
+      final pokemon = await (select(
+        pokemonTable,
+      )..where((t) => t.id.equals(pokemonId))).getSingleOrNull();
+      if (pokemon == null) return null;
+
+      final species = await (select(
+        speciesTable,
+      )..where((t) => t.id.equals(pokemon.speciesId))).getSingle();
+
+      final types =
+          await (select(pokemonTypesTable).join([
+                  innerJoin(
+                    typesTable,
+                    typesTable.id.equalsExp(pokemonTypesTable.typeId),
+                  ),
+                ])
+                ..where(pokemonTypesTable.pokemonId.equals(pokemonId))
+                ..orderBy([OrderingTerm.asc(pokemonTypesTable.slot)]))
+              .map((r) => r.readTable(typesTable))
+              .get();
+
+      final abilities =
+          await (select(pokemonAbilitiesTable).join([
+                  innerJoin(
+                    abilitiesTable,
+                    abilitiesTable.id.equalsExp(
+                      pokemonAbilitiesTable.abilityId,
+                    ),
+                  ),
+                ])
+                ..where(pokemonAbilitiesTable.pokemonId.equals(pokemonId))
+                ..orderBy([OrderingTerm.asc(pokemonAbilitiesTable.slot)]))
+              .map(
+                (r) => (
+                  link: r.readTable(pokemonAbilitiesTable),
+                  ability: r.readTable(abilitiesTable),
+                ),
+              )
+              .get();
+
+      final moves =
+          await (select(pokemonMovesTable).join([
+                  innerJoin(
+                    movesTable,
+                    movesTable.id.equalsExp(pokemonMovesTable.moveId),
+                  ),
+                ])
+                ..where(pokemonMovesTable.pokemonId.equals(pokemonId))
+                ..orderBy([
+                  OrderingTerm.asc(pokemonMovesTable.versionGroupId),
+                  OrderingTerm.asc(pokemonMovesTable.levelLearned),
+                ]))
+              .map(
+                (r) => (
+                  link: r.readTable(pokemonMovesTable),
+                  move: r.readTable(movesTable),
+                ),
+              )
+              .get();
+
+      // 0 si la especie no tiene cadena (o más bien que la cadena es ella sola)
+      final chainSpecies = species.evolutionChainId == 0
+          ? [species]
+          : await (select(speciesTable)
+                  ..where(
+                    (t) => t.evolutionChainId.equals(species.evolutionChainId),
+                  )
+                  ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+                .get();
+
+      final evolutions = await (select(
+        evolutionsTable,
+      )..where((t) => t.toSpeciesId.isIn(chainSpecies.map((s) => s.id)))).get();
+
+      final eggGroups =
+          await (select(speciesEggGroupsTable).join([
+                innerJoin(
+                  eggGroupsTable,
+                  eggGroupsTable.id.equalsExp(speciesEggGroupsTable.eggGroupId),
+                ),
+              ])..where(speciesEggGroupsTable.speciesId.equals(species.id)))
+              .map((r) => r.readTable(eggGroupsTable))
+              .get();
+
+      final varieties =
+          await (select(pokemonTable)
+                ..where((t) => t.speciesId.equals(species.id))
+                ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+              .get();
+
+      final versionGroupIds = moves.map((m) => m.link.versionGroupId).toSet();
+      final versionGroups =
+          await (select(versionGroupsTable)
+                ..where((t) => t.id.isIn(versionGroupIds))
+                ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+              .get();
+
+      final sync =
+          await (select(syncMetadataTable)..where(
+                (t) => t.resourceKey.equals(SyncResourceKeys.detail(pokemonId)),
+              ))
+              .getSingleOrNull();
+
+      return PokemonDetailLocal(
+        pokemon: pokemon,
+        species: species,
+        types: types,
+        abilities: abilities,
+        moves: moves,
+        chainSpecies: chainSpecies,
+        evolutions: evolutions,
+        eggGroups: eggGroups,
+        varieties: varieties,
+        versionGroups: versionGroups,
+        sync: sync,
+      );
     });
   }
 }
