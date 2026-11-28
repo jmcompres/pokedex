@@ -33,10 +33,9 @@ class DetailSyncCoordinator {
     int pokemonid, {
     bool force = false,
   }) {
-    return _running[pokemonid] ??= _run(
-      pokemonid,
-      force,
-    ).whenComplete(() => _running.remove(pokemonid));
+    return _running[pokemonid] ??= _run(pokemonid, force).whenComplete(() {
+      _running.remove(pokemonid);
+    });
   }
 
   Future<Result<void, Failure>> _run(int pokemonId, bool force) async {

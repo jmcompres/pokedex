@@ -1,7 +1,7 @@
 import 'package:pokedex/core/errors/failures.dart';
 
 String? _primerTexto(Map<String, dynamic> json, String lista, String campo) {
-  final items = json['lista'] as List<dynamic>?;
+  final items = json[lista] as List<dynamic>?;
   if (items == null || items.isEmpty) return null;
   return (items.first as Map<String, dynamic>)[campo] as String?;
 }
@@ -209,7 +209,7 @@ class PokemonDetailDto {
 
   factory PokemonDetailDto.fromJson(Map<String, dynamic> json) {
     final species = json['pokemonspecy'] as Map<String, dynamic>? ?? const {};
-    final chainNode = species['evolutionChain'] as Map<String, dynamic>?;
+    final chainNode = species['evolutionchain'] as Map<String, dynamic>?;
 
     return PokemonDetailDto(
       pokemonId: json['id'] as int,
