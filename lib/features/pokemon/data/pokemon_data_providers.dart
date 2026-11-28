@@ -3,6 +3,8 @@ import 'package:pokedex/core/database/database_providers.dart';
 import 'package:pokedex/core/sync/domain/last_sync.dart';
 import 'package:pokedex/core/sync/domain/sync_status.dart';
 import 'package:pokedex/core/sync/sync_providers.dart';
+import 'package:pokedex/features/pokemon/data/datasources/local/pokemon_detail_dao.dart';
+import 'package:pokedex/features/pokemon/data/sync/detail_sync_coordinator.dart';
 import 'package:pokedex/features/pokemon/domain/repositories/pokemon_repository.dart';
 
 import 'datasources/local/pokemon_dao.dart';
@@ -24,11 +26,25 @@ final catalogSyncCoordinatorProvider = Provider<CatalogSyncCoordinator>((ref) {
   return coordinator;
 });
 
+final pokemonDetailDaoProvider = Provider<PokemonDetailDao>(
+  (ref) => PokemonDetailDao(ref.watch(appDatabaseProvider)),
+);
+
+final detailSyncCoordinatorProvider = Provider<DetailSyncCoordinator>(
+  (ref) => DetailSyncCoordinator(
+    remote: ref.watch(pokemonRemoteDataSourceProvider),
+    detailDao: ref.watch(pokemonDetailDaoProvider),
+    syncMetadataDao: ref.watch(syncMetadataDaoProvider),
+  ),
+);
+
 final pokemonRepositoryProvider = Provider<PokemonRepository>(
   (ref) => PokemonRepositoryImpl(
     pokemonDao: ref.watch(pokemonDaoProvider),
     syncMetadataDao: ref.watch(syncMetadataDaoProvider),
     coordinator: ref.watch(catalogSyncCoordinatorProvider),
+    detailDao: ref.watch(pokemonDetailDaoProvider),
+    detailCoordinator: ref.watch(detailSyncCoordinatorProvider),
   ),
 );
 

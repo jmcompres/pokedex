@@ -41,16 +41,16 @@ extension ChainSpeciesDtoMapper on ChainSpeciesDto {
     final from = evolvesFromSpeciesId;
     if (from == null) return const [];
     return [
-      for (final evo_morph in evolutions)
+      for (final evoMorph in evolutions)
         EvolutionsTableCompanion(
-          id: Value(evo_morph.id),
+          id: Value(evoMorph.id),
           fromSpeciesId: Value(from),
           toSpeciesId: Value(id),
-          triggerName: Value(evo_morph.trigger),
-          minLevel: Value(evo_morph.minLevel),
-          item: Value(evo_morph.item),
-          minHappiness: Value(evo_morph.minHappiness),
-          timeOfDay: Value(evo_morph.timeOfDay),
+          triggerName: Value(evoMorph.trigger),
+          minLevel: Value(evoMorph.minLevel),
+          item: Value(evoMorph.item),
+          minHappiness: Value(evoMorph.minHappiness),
+          timeOfDay: Value(evoMorph.timeOfDay),
         ),
     ];
   }

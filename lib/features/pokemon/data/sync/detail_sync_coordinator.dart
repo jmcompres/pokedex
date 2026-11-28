@@ -15,7 +15,7 @@ class DetailSyncCoordinator {
   DetailSyncCoordinator({
     required this.remote,
     required this.detailDao,
-    required this.syncMetadataDao
+    required this.syncMetadataDao,
   });
 
   final PokemonRemoteDataSource remote;
@@ -23,12 +23,19 @@ class DetailSyncCoordinator {
   final SyncMetadataDao syncMetadataDao;
 
   static const detailMaxAge = Duration(days: 7);
-  final _running = <int, Future<Result<void, Failure>>>{}; //la clave int es porque es uno para cada pokemon
+  final _running =
+      <
+        int,
+        Future<Result<void, Failure>>
+      >{}; //la clave int es porque es uno para cada pokemon
 
-  Future<Result<void, Failure>> syncDetail(int pokemonid, {bool force = false}) {
+  Future<Result<void, Failure>> syncDetail(
+    int pokemonid, {
+    bool force = false,
+  }) {
     return _running[pokemonid] ??= _run(
       pokemonid,
-      force
+      force,
     ).whenComplete(() => _running.remove(pokemonid));
   }
 
@@ -42,8 +49,8 @@ class DetailSyncCoordinator {
         SyncMetadataTableCompanion(
           resourceKey: Value(key),
           status: const Value(SyncStatusDb.syncing),
-          lastAttemptAt: Value(DateTime.now())
-        )
+          lastAttemptAt: Value(DateTime.now()),
+        ),
       );
 
       final dto = await remote.fetchPokemonDetail(pokemonId);
@@ -57,8 +64,8 @@ class DetailSyncCoordinator {
           status: const Value(SyncStatusDb.completed),
           lastSuccessAt: Value(now),
           lastAttemptAt: Value(now),
-          lastError: const Value(null)
-        )
+          lastError: const Value(null),
+        ),
       );
       return _ok; //ya de aquí drift indica al dao que cambiaron los datos y ya el repository se entera por usar el watch del dao
     } on Failure catch (failure) {
@@ -76,7 +83,7 @@ class DetailSyncCoordinator {
           status: const Value(SyncStatusDb.failed),
           lastError: Value(failure.debugMessage ?? '${failure.runtimeType}'),
           lastAttemptAt: Value(DateTime.now()),
-        )
+        ),
       );
     } on Exception {
       //
