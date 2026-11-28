@@ -66,9 +66,8 @@ class GraphQLService {
       throw ServerFailure(debugMessage: 'Error inesperado: $e');
     } finally {
       stopwatch.stop();
-      final offset = variables['offset'] ?? 'N/A';
       debugPrint(
-        '[GraphQL] op: $operationName | offset: $offset | duration: ${stopwatch.elapsedMilliseconds}ms',
+        '[GraphQL] op: $operationName | vars: $variables | duration: ${stopwatch.elapsedMilliseconds}ms',
       );
     }
   }

@@ -12,6 +12,7 @@ import 'package:pokedex/core/sync/sync_metadata_dao.dart';
 import 'package:pokedex/core/sync/sync_resource_keys.dart';
 import 'package:pokedex/core/utils/result.dart';
 import 'package:pokedex/features/pokemon/data/datasources/local/pokemon_dao.dart';
+import 'package:pokedex/features/pokemon/data/datasources/remote/pokemon_detail_dtos.dart';
 import 'package:pokedex/features/pokemon/data/datasources/remote/pokemon_remote_datasource.dart';
 import 'package:pokedex/features/pokemon/data/datasources/remote/pokemon_remote_dtos.dart';
 import 'package:pokedex/features/pokemon/data/sync/catalog_sync_coordinator.dart';
@@ -91,6 +92,10 @@ class _PokeApiFalsa implements PokemonRemoteDataSource {
         ),
     ];
   }
+
+  @override
+  Future<PokemonDetailDto> fetchPokemonDetail(int pokemonId) =>
+      throw UnimplementedError('El catálogo no usa el detalle');
 }
 
 void main() {
